@@ -4,7 +4,7 @@
   <img src="./assets/logo.png" width="120" height="120" alt="RAG-Anything Logo" style="border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 217, 255, 0.3);">
 </div>
 
-# 🚀 RAG-Anything: All-in-One RAG Framework
+# 🚀 RAG-Anything: 올인원 RAG 프레임워크
 
 <a href="https://trendshift.io/repositories/14959" target="_blank"><img src="https://trendshift.io/api/badge/repositories/14959" alt="HKUDS%2FRAG-Anything | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
@@ -47,7 +47,7 @@
 </div>
 
 <div align="center">
-  <a href="#-quick-start" style="text-decoration: none;">
+  <a href="#-빠른-시작" style="text-decoration: none;">
     <img src="https://img.shields.io/badge/Quick%20Start-Get%20Started%20Now-00d9ff?style=for-the-badge&logo=rocket&logoColor=white&labelColor=1a1a2e">
   </a>
 </div>
@@ -75,54 +75,67 @@
 
 ---
 
-## 🎉 News
-- [X] [2025.10]🎯📢 🚀 We have released the technical report of [RAG-Anything](http://arxiv.org/abs/2510.12323). Access it now to explore our latest research findings.
-- [X] [2025.08]🎯📢 🔍 RAG-Anything now features **VLM-Enhanced Query** mode! When documents include images, the system seamlessly integrates them into VLM for advanced multimodal analysis, combining visual and textual context for deeper insights.
-- [X] [2025.07]🎯📢 RAG-Anything now features a [context configuration module](docs/context_aware_processing.md), enabling intelligent integration of relevant contextual information to enhance multimodal content processing.
-- [X] [2025.07]🎯📢 🚀 RAG-Anything now supports multimodal query capabilities, enabling enhanced RAG with seamless processing of text, images, tables, and equations.
-- [X] [2025.07]🎯📢 🎉 RAG-Anything has reached 1k🌟 stars on GitHub! Thank you for your incredible support and valuable contributions to the project.
+## 🇰🇷 ko-rag-anything 소개
+
+**ko-rag-anything**는 [HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything)을 기반으로 한국어 RAG 환경에 맞춰 강화한 포크입니다. 상위 프로젝트의 모든 멀티모달 기능을 그대로 유지하면서, 한국어 문서 처리·검색 품질을 끌어올리기 위한 다음 기능들을 추가로 제공합니다.
+
+- **한국어 프롬프트 템플릿** — `raganything.prompt_manager`의 `set_prompt_language("ko")`를 호출하면 이미지 분석, 표 해석, 엔티티 추출 등 파이프라인 전반의 프롬프트를 한국어로 전환합니다. (사용 가능한 언어가 없을 경우 `register_prompt_language()`로 직접 등록할 수 있습니다.)
+- **한국어 텍스트 유틸리티** — `raganything.korean_utils`는 정규화(normalization), 문장 분리, 한국어 인식 토크나이저를 제공하며, 선택적으로 `kiwipiepy` 기반 형태소 분석을 활용할 수 있습니다.
+- **한국어 임베딩·OCR 가이드** — `BAAI/bge-m3`, `nlpai-lab/KURE-v1`처럼 한국어를 잘 지원하는 임베딩 모델과, `lang="korean"` 옵션을 적용한 MinerU OCR 사용을 권장합니다.
+
+자세한 사용 방법은 [`docs/korean.md`](docs/korean.md) 가이드와 [`examples/korean_example.py`](examples/korean_example.py) 예제를 참고하세요.
 
 ---
 
-## 🌟 System Overview
+## 🎉 소식
+- [X] [2025.10]🎯📢 🚀 [RAG-Anything](http://arxiv.org/abs/2510.12323)의 기술 보고서를 공개했습니다. 지금 확인하고 최신 연구 성과를 살펴보세요.
+- [X] [2025.08]🎯📢 🔍 RAG-Anything이 **VLM 강화 질의(VLM-Enhanced Query)** 모드를 지원합니다! 문서에 이미지가 포함되어 있으면 시스템이 이를 VLM에 매끄럽게 통합하여 시각적·텍스트적 문맥을 결합한 고급 멀티모달 분석으로 더 깊은 인사이트를 제공합니다.
+- [X] [2025.07]🎯📢 RAG-Anything에 [컨텍스트 구성 모듈](docs/context_aware_processing.md)이 추가되어, 관련 문맥 정보를 지능적으로 통합해 멀티모달 콘텐츠 처리를 향상시킵니다.
+- [X] [2025.07]🎯📢 🚀 RAG-Anything이 멀티모달 질의 기능을 지원하여, 텍스트·이미지·표·수식을 매끄럽게 처리하는 강화된 RAG를 구현했습니다.
+- [X] [2025.07]🎯📢 🎉 RAG-Anything이 GitHub에서 1k🌟 스타를 달성했습니다! 변함없는 성원과 소중한 기여에 감사드립니다.
 
-*Next-Generation Multimodal Intelligence*
+---
+
+## 🌟 시스템 개요
+
+*차세대 멀티모달 인텔리전스*
 
 <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 15px; padding: 25px; margin: 20px 0; border: 2px solid #00d9ff; box-shadow: 0 0 30px rgba(0, 217, 255, 0.3);">
 
-Modern documents increasingly contain diverse multimodal content—text, images, tables, equations, charts, and multimedia—that traditional text-focused RAG systems cannot effectively process. **RAG-Anything** addresses this challenge as a comprehensive **All-in-One Multimodal Document Processing RAG system** built on [LightRAG](https://github.com/HKUDS/LightRAG).
+현대의 문서는 텍스트, 이미지, 표, 수식, 차트, 멀티미디어 등 점점 더 다양한 멀티모달 콘텐츠를 담고 있으며, 텍스트 중심의 전통적인 RAG 시스템으로는 이를 효과적으로 처리하기 어렵습니다. **RAG-Anything**은 [LightRAG](https://github.com/HKUDS/LightRAG) 위에 구축된 종합 **올인원 멀티모달 문서 처리 RAG 시스템**으로서 이 과제를 해결합니다.
 
-As a unified solution, RAG-Anything **eliminates the need for multiple specialized tools**. It provides **seamless processing and querying across all content modalities** within a single integrated framework. Unlike conventional RAG approaches that struggle with non-textual elements, our all-in-one system delivers **comprehensive multimodal retrieval capabilities**.
+통합 솔루션인 RAG-Anything은 **여러 전문 도구를 따로 사용할 필요를 없애 줍니다**. 하나의 통합된 프레임워크 안에서 **모든 콘텐츠 모달리티에 걸친 매끄러운 처리와 질의**를 제공합니다. 비텍스트 요소를 다루는 데 어려움을 겪는 기존 RAG 방식과 달리, 본 올인원 시스템은 **종합적인 멀티모달 검색 기능**을 제공합니다.
 
-Users can query documents containing **interleaved text**, **visual diagrams**, **structured tables**, and **mathematical formulations** through **one cohesive interface**. This consolidated approach makes RAG-Anything particularly valuable for academic research, technical documentation, financial reports, and enterprise knowledge management where rich, mixed-content documents demand a **unified processing framework**.
+사용자는 **텍스트가 뒤섞인 콘텐츠**, **시각적 다이어그램**, **구조화된 표**, **수학적 표현**이 포함된 문서를 **하나의 일관된 인터페이스**로 질의할 수 있습니다. 이러한 통합 접근 방식 덕분에 RAG-Anything은 풍부한 혼합 콘텐츠 문서가 **통합 처리 프레임워크**를 요구하는 학술 연구, 기술 문서, 재무 보고서, 기업 지식 관리 분야에서 특히 유용합니다.
 
 <img src="assets/rag_anything_framework.png" alt="RAG-Anything" />
 
 </div>
 
-### 🎯 Key Features
+### 🎯 핵심 기능
 
 <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 15px; padding: 25px; margin: 20px 0;">
 
-- **🔄 End-to-End Multimodal Pipeline** - Complete workflow from document ingestion and parsing to intelligent multimodal query answering
-- **📄 Universal Document Support** - Seamless processing of PDFs, Office documents, images, and diverse file formats
-- **🧠 Specialized Content Analysis** - Dedicated processors for images, tables, mathematical equations, and heterogeneous content types
-- **🔗 Multimodal Knowledge Graph** - Automatic entity extraction and cross-modal relationship discovery for enhanced understanding
-- **⚡ Adaptive Processing Modes** - Flexible MinerU-based parsing or direct multimodal content injection workflows
-- **📋 Direct Content List Insertion** - Bypass document parsing by directly inserting pre-parsed content lists from external sources
-- **🎯 Hybrid Intelligent Retrieval** - Advanced search capabilities spanning textual and multimodal content with contextual understanding
+- **🔄 엔드투엔드 멀티모달 파이프라인** - 문서 수집과 파싱부터 지능적인 멀티모달 질의 응답까지 이어지는 완전한 워크플로
+- **📄 범용 문서 지원** - PDF, Office 문서, 이미지 등 다양한 파일 형식의 매끄러운 처리
+- **🧠 특화된 콘텐츠 분석** - 이미지, 표, 수학 수식, 이질적인 콘텐츠 유형을 위한 전용 프로세서
+- **🔗 멀티모달 지식 그래프** - 자동 엔티티 추출과 모달 간 관계 발견으로 이해도 향상
+- **⚡ 적응형 처리 모드** - 유연한 MinerU 기반 파싱 또는 직접 멀티모달 콘텐츠 주입 워크플로
+- **📋 콘텐츠 리스트 직접 삽입** - 외부 소스에서 미리 파싱한 콘텐츠 리스트를 직접 삽입하여 문서 파싱 단계를 생략
+- **🎯 하이브리드 지능형 검색** - 문맥 이해를 바탕으로 텍스트와 멀티모달 콘텐츠를 아우르는 고급 검색 기능
+- **🇰🇷 한국어 강화** - 한국어 프롬프트 템플릿(`set_prompt_language("ko")`), 한국어 텍스트 유틸리티(`raganything.korean_utils`), 한국어 임베딩·OCR 가이드 제공
 
 </div>
 
 ---
 
-## 🏗️ Algorithm & Architecture
+## 🏗️ 알고리즘 및 아키텍처
 
 <div style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%); border-radius: 15px; padding: 25px; margin: 20px 0; border-left: 5px solid #00d9ff;">
 
-### Core Algorithm
+### 핵심 알고리즘
 
-**RAG-Anything** implements an effective **multi-stage multimodal pipeline** that fundamentally extends traditional RAG architectures to seamlessly handle diverse content modalities through intelligent orchestration and cross-modal understanding.
+**RAG-Anything**은 전통적인 RAG 아키텍처를 근본적으로 확장하는 효과적인 **다단계 멀티모달 파이프라인**을 구현하여, 지능적인 오케스트레이션과 모달 간 이해를 통해 다양한 콘텐츠 모달리티를 매끄럽게 처리합니다.
 
 </div>
 
@@ -152,179 +165,181 @@ Users can query documents containing **interleaved text**, **visual diagrams**, 
   </div>
 </div>
 
-### 1. Document Parsing Stage
+### 1. 문서 파싱 단계
 
 <div style="background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 20px; margin: 15px 0; border-left: 4px solid #4ecdc4;">
 
-The system provides high-fidelity document extraction through adaptive content decomposition. It intelligently segments heterogeneous elements while preserving contextual relationships. Universal format compatibility is achieved via specialized optimized parsers.
+시스템은 적응형 콘텐츠 분해를 통해 고충실도의 문서 추출을 제공합니다. 문맥적 관계를 보존하면서 이질적인 요소를 지능적으로 분할합니다. 전문화되고 최적화된 파서를 통해 범용 형식 호환성을 달성합니다.
 
-**Key Components:**
+**핵심 구성 요소:**
 
-- **⚙️ MinerU Integration**: Leverages [MinerU](https://github.com/opendatalab/MinerU) for high-fidelity document structure extraction and semantic preservation across complex layouts.
+- **⚙️ MinerU 통합**: [MinerU](https://github.com/opendatalab/MinerU)를 활용하여 복잡한 레이아웃에서도 고충실도의 문서 구조 추출과 의미 보존을 수행합니다.
 
-- **🧩 Adaptive Content Decomposition**: Automatically segments documents into coherent text blocks, visual elements, structured tables, mathematical equations, and specialized content types while preserving contextual relationships.
+- **🧩 적응형 콘텐츠 분해**: 문맥적 관계를 보존하면서 문서를 일관된 텍스트 블록, 시각적 요소, 구조화된 표, 수학 수식, 특수 콘텐츠 유형으로 자동 분할합니다.
 
-- **📁 Universal Format Support**: Provides comprehensive handling of PDFs, Office documents (DOC/DOCX/PPT/PPTX/XLS/XLSX), images, and emerging formats through specialized parsers with format-specific optimization.
+- **📁 범용 형식 지원**: 형식별 최적화를 갖춘 전문 파서를 통해 PDF, Office 문서(DOC/DOCX/PPT/PPTX/XLS/XLSX), 이미지 및 신규 형식을 폭넓게 처리합니다.
 
 </div>
 
-### 2. Multi-Modal Content Understanding & Processing
+### 2. 멀티모달 콘텐츠 이해 및 처리
 
 <div style="background: linear-gradient(90deg, #16213e 0%, #0f3460 100%); border-radius: 10px; padding: 20px; margin: 15px 0; border-left: 4px solid #ff6b6b;">
 
-The system automatically categorizes and routes content through optimized channels. It uses concurrent pipelines for parallel text and multimodal processing. Document hierarchy and relationships are preserved during transformation.
+시스템은 콘텐츠를 자동으로 분류하고 최적화된 채널로 라우팅합니다. 텍스트와 멀티모달 처리를 병렬화하기 위해 동시 파이프라인을 사용합니다. 변환 과정에서 문서 계층 구조와 관계가 보존됩니다.
 
-**Key Components:**
+**핵심 구성 요소:**
 
-- **🎯 Autonomous Content Categorization and Routing**: Automatically identify, categorize, and route different content types through optimized execution channels.
+- **🎯 자율적 콘텐츠 분류 및 라우팅**: 서로 다른 콘텐츠 유형을 자동으로 식별·분류하고 최적화된 실행 채널로 라우팅합니다.
 
-- **⚡ Concurrent Multi-Pipeline Architecture**: Implements concurrent execution of textual and multimodal content through dedicated processing pipelines. This approach maximizes throughput efficiency while preserving content integrity.
+- **⚡ 동시 다중 파이프라인 아키텍처**: 전용 처리 파이프라인을 통해 텍스트 콘텐츠와 멀티모달 콘텐츠를 동시에 실행합니다. 이 방식은 콘텐츠 무결성을 유지하면서 처리량 효율을 극대화합니다.
 
-- **🏗️ Document Hierarchy Extraction**: Extracts and preserves original document hierarchy and inter-element relationships during content transformation.
+- **🏗️ 문서 계층 구조 추출**: 콘텐츠 변환 과정에서 원본 문서의 계층 구조와 요소 간 관계를 추출·보존합니다.
 
 </div>
 
-### 3. Multimodal Analysis Engine
+### 3. 멀티모달 분석 엔진
 
 <div style="background: linear-gradient(90deg, #0f3460 0%, #1a1a2e 100%); border-radius: 10px; padding: 20px; margin: 15px 0; border-left: 4px solid #00d9ff;">
 
-The system deploys modality-aware processing units for heterogeneous data modalities:
+시스템은 이질적인 데이터 모달리티를 위해 모달리티 인식 처리 유닛을 배치합니다:
 
-**Specialized Analyzers:**
+**전문 분석기:**
 
-- **🔍 Visual Content Analyzer**:
-  - Integrate vision model for image analysis.
-  - Generates context-aware descriptive captions based on visual semantics.
-  - Extracts spatial relationships and hierarchical structures between visual elements.
+- **🔍 시각 콘텐츠 분석기(Visual Content Analyzer)**:
+  - 이미지 분석을 위해 비전 모델을 통합합니다.
+  - 시각적 의미를 기반으로 문맥 인식 설명 캡션을 생성합니다.
+  - 시각적 요소 간의 공간적 관계와 계층 구조를 추출합니다.
 
-- **📊 Structured Data Interpreter**:
-  - Performs systematic interpretation of tabular and structured data formats.
-  - Implements statistical pattern recognition algorithms for data trend analysis.
-  - Identifies semantic relationships and dependencies across multiple tabular datasets.
+- **📊 구조화 데이터 해석기(Structured Data Interpreter)**:
+  - 표 및 구조화된 데이터 형식을 체계적으로 해석합니다.
+  - 데이터 추세 분석을 위한 통계적 패턴 인식 알고리즘을 구현합니다.
+  - 여러 표 데이터셋 전반에 걸친 의미적 관계와 의존성을 식별합니다.
 
-- **📐 Mathematical Expression Parser**:
-  - Parses complex mathematical expressions and formulas with high accuracy.
-  - Provides native LaTeX format support for seamless integration with academic workflows.
-  - Establishes conceptual mappings between mathematical equations and domain-specific knowledge bases.
+- **📐 수학 표현 파서(Mathematical Expression Parser)**:
+  - 복잡한 수학 표현과 공식을 높은 정확도로 파싱합니다.
+  - 학술 워크플로와의 매끄러운 통합을 위해 네이티브 LaTeX 형식을 지원합니다.
+  - 수학 수식과 도메인별 지식 베이스 간의 개념적 매핑을 구축합니다.
 
-- **🔧 Extensible Modality Handler**:
-  - Provides configurable processing framework for custom and emerging content types.
-  - Enables dynamic integration of new modality processors through plugin architecture.
-  - Supports runtime configuration of processing pipelines for specialized use cases.
+- **🔧 확장형 모달리티 핸들러(Extensible Modality Handler)**:
+  - 사용자 정의 및 신규 콘텐츠 유형을 위한 구성 가능한 처리 프레임워크를 제공합니다.
+  - 플러그인 아키텍처를 통해 새로운 모달리티 프로세서를 동적으로 통합할 수 있습니다.
+  - 특수 사용 사례를 위한 처리 파이프라인의 런타임 구성을 지원합니다.
 
 </div>
 
-### 4. Multimodal Knowledge Graph Index
+### 4. 멀티모달 지식 그래프 인덱스
 
 <div style="background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 20px; margin: 15px 0; border-left: 4px solid #4ecdc4;">
 
-The multi-modal knowledge graph construction module transforms document content into structured semantic representations. It extracts multimodal entities, establishes cross-modal relationships, and preserves hierarchical organization. The system applies weighted relevance scoring for optimized knowledge retrieval.
+멀티모달 지식 그래프 구축 모듈은 문서 콘텐츠를 구조화된 의미 표현으로 변환합니다. 멀티모달 엔티티를 추출하고, 모달 간 관계를 설정하며, 계층적 구조를 보존합니다. 시스템은 최적화된 지식 검색을 위해 가중 관련도 점수화를 적용합니다.
 
-**Core Functions:**
+**핵심 기능:**
 
-- **🔍 Multi-Modal Entity Extraction**: Transforms significant multimodal elements into structured knowledge graph entities. The process includes semantic annotations and metadata preservation.
+- **🔍 멀티모달 엔티티 추출**: 중요한 멀티모달 요소를 구조화된 지식 그래프 엔티티로 변환합니다. 이 과정에는 의미 주석과 메타데이터 보존이 포함됩니다.
 
-- **🔗 Cross-Modal Relationship Mapping**: Establishes semantic connections and dependencies between textual entities and multimodal components. This is achieved through automated relationship inference algorithms.
+- **🔗 모달 간 관계 매핑**: 텍스트 엔티티와 멀티모달 구성 요소 사이에 의미적 연결과 의존성을 설정합니다. 이는 자동화된 관계 추론 알고리즘을 통해 이루어집니다.
 
-- **🏗️ Hierarchical Structure Preservation**: Maintains original document organization through "belongs_to" relationship chains. These chains preserve logical content hierarchy and sectional dependencies.
+- **🏗️ 계층 구조 보존**: "belongs_to" 관계 체인을 통해 원본 문서 구성을 유지합니다. 이 체인은 논리적 콘텐츠 계층과 섹션 간 의존성을 보존합니다.
 
-- **⚖️ Weighted Relationship Scoring**: Assigns quantitative relevance scores to relationship types. Scoring is based on semantic proximity and contextual significance within the document structure.
+- **⚖️ 가중 관계 점수화**: 관계 유형에 정량적 관련도 점수를 부여합니다. 점수는 문서 구조 내의 의미적 근접성과 문맥적 중요도를 기반으로 산정됩니다.
 
 </div>
 
-### 5. Modality-Aware Retrieval
+### 5. 모달리티 인식 검색
 
 <div style="background: linear-gradient(90deg, #16213e 0%, #0f3460 100%); border-radius: 10px; padding: 20px; margin: 15px 0; border-left: 4px solid #ff6b6b;">
 
-The hybrid retrieval system combines vector similarity search with graph traversal algorithms for comprehensive content retrieval. It implements modality-aware ranking mechanisms and maintains relational coherence between retrieved elements to ensure contextually integrated information delivery.
+하이브리드 검색 시스템은 종합적인 콘텐츠 검색을 위해 벡터 유사도 검색과 그래프 순회 알고리즘을 결합합니다. 모달리티 인식 랭킹 메커니즘을 구현하고 검색된 요소 간의 관계적 일관성을 유지하여, 문맥적으로 통합된 정보 전달을 보장합니다.
 
-**Retrieval Mechanisms:**
+**검색 메커니즘:**
 
-- **🔀 Vector-Graph Fusion**: Integrates vector similarity search with graph traversal algorithms. This approach leverages both semantic embeddings and structural relationships for comprehensive content retrieval.
+- **🔀 벡터-그래프 융합**: 벡터 유사도 검색과 그래프 순회 알고리즘을 통합합니다. 이 방식은 의미 임베딩과 구조적 관계를 모두 활용하여 종합적인 콘텐츠 검색을 수행합니다.
 
-- **📊 Modality-Aware Ranking**: Implements adaptive scoring mechanisms that weight retrieval results based on content type relevance. The system adjusts rankings according to query-specific modality preferences.
+- **📊 모달리티 인식 랭킹**: 콘텐츠 유형의 관련성에 따라 검색 결과에 가중치를 부여하는 적응형 점수화 메커니즘을 구현합니다. 시스템은 질의별 모달리티 선호도에 맞춰 랭킹을 조정합니다.
 
-- **🔗 Relational Coherence Maintenance**: Maintains semantic and structural relationships between retrieved elements. This ensures coherent information delivery and contextual integrity.
+- **🔗 관계적 일관성 유지**: 검색된 요소 간의 의미적·구조적 관계를 유지합니다. 이를 통해 일관된 정보 전달과 문맥 무결성을 보장합니다.
 
 </div>
 
 ---
 
-## 🚀 Quick Start
+## 🚀 빠른 시작
 
-*Initialize Your AI Journey*
+*AI 여정을 시작하세요*
 
 <div align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
 </div>
 
-### Installation
+### 설치
 
-#### Option 1: Install from PyPI (Recommended)
+#### 옵션 1: PyPI에서 설치 (권장)
 
 ```bash
-# Basic installation
+# 기본 설치
 pip install raganything
 
-# With optional dependencies for extended format support:
-pip install 'raganything[all]'              # All optional features
-pip install 'raganything[image]'            # Image format conversion (BMP, TIFF, GIF, WebP)
-pip install 'raganything[text]'             # Text file processing (TXT, MD)
-pip install 'raganything[image,text]'       # Multiple features
+# 확장 형식 지원을 위한 선택적 의존성과 함께 설치:
+pip install 'raganything[all]'              # 모든 선택적 기능
+pip install 'raganything[image]'            # 이미지 형식 변환 (BMP, TIFF, GIF, WebP)
+pip install 'raganything[text]'             # 텍스트 파일 처리 (TXT, MD)
+pip install 'raganything[image,text]'       # 여러 기능 동시 선택
 ```
 
-#### Option 2: Install from Source
+#### 옵션 2: 소스에서 설치
 ```bash
-# Install uv (if not already installed)
+# uv 설치 (아직 설치하지 않은 경우)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clone and setup the project with uv
+# uv로 프로젝트 클론 및 설정
 git clone https://github.com/HKUDS/RAG-Anything.git
 cd RAG-Anything
 
-# Install the package and dependencies in a virtual environment
+# 가상 환경에 패키지와 의존성 설치
 uv sync
 
-# If you encounter network timeouts (especially for opencv packages):
+# 네트워크 타임아웃이 발생하는 경우 (특히 opencv 패키지):
 # UV_HTTP_TIMEOUT=120 uv sync
 
-# Run commands directly with uv (recommended approach)
+# uv로 직접 명령 실행 (권장 방식)
 uv run python examples/raganything_example.py --help
 
-# Install with optional dependencies
-uv sync --extra image --extra text  # Specific extras
-uv sync --all-extras                 # All optional features
+# 선택적 의존성과 함께 설치
+uv sync --extra image --extra text  # 특정 extras
+uv sync --all-extras                 # 모든 선택적 기능
 ```
 
-#### Optional Dependencies
+#### 선택적 의존성
 
-- **`[image]`** - Enables processing of BMP, TIFF, GIF, WebP image formats (requires Pillow)
-- **`[text]`** - Enables processing of TXT and MD files (requires ReportLab)
-- **`[all]`** - Includes all Python optional dependencies
+- **`[image]`** - BMP, TIFF, GIF, WebP 이미지 형식 처리 지원 (Pillow 필요)
+- **`[text]`** - TXT 및 MD 파일 처리 지원 (ReportLab 필요)
+- **`[all]`** - 모든 Python 선택적 의존성 포함
 
-> **⚠️ Office Document Processing Requirements:**
-> - Office documents (.doc, .docx, .ppt, .pptx, .xls, .xlsx) require **LibreOffice** installation
-> - Download from [LibreOffice official website](https://www.libreoffice.org/download/download/)
-> - **Windows**: Download installer from official website
+> **⚠️ Office 문서 처리 요구 사항:**
+> - Office 문서(.doc, .docx, .ppt, .pptx, .xls, .xlsx)는 **LibreOffice** 설치가 필요합니다
+> - [LibreOffice 공식 웹사이트](https://www.libreoffice.org/download/download/)에서 다운로드하세요
+> - **Windows**: 공식 웹사이트에서 설치 프로그램 다운로드
 > - **macOS**: `brew install --cask libreoffice`
 > - **Ubuntu/Debian**: `sudo apt-get install libreoffice`
 > - **CentOS/RHEL**: `sudo yum install libreoffice`
 
-**Check MinerU installation:**
+**MinerU 설치 확인:**
 
 ```bash
-# Verify installation
+# 설치 확인
 mineru --version
 
-# Check if properly configured
+# 올바르게 구성되었는지 확인
 python -c "from raganything import RAGAnything; rag = RAGAnything(); print('✅ MinerU installed properly' if rag.check_parser_installation() else '❌ MinerU installation issue')"
 ```
 
-Models are downloaded automatically on first use. For manual download, refer to [MinerU Model Source Configuration](https://github.com/opendatalab/MinerU/blob/master/README.md#22-model-source-configuration).
+모델은 최초 사용 시 자동으로 다운로드됩니다. 수동 다운로드는 [MinerU Model Source Configuration](https://github.com/opendatalab/MinerU/blob/master/README.md#22-model-source-configuration)을 참고하세요.
 
-### Usage Examples
+> **🇰🇷 한국어 문서 팁:** 한국어 문서를 OCR 처리할 때는 MinerU에 `lang="korean"` 옵션을 전달하면 인식 정확도가 향상됩니다. 또한 한국어를 잘 지원하는 임베딩 모델(예: `BAAI/bge-m3`, `nlpai-lab/KURE-v1`)을 사용하는 것을 권장합니다. 자세한 내용은 [`docs/korean.md`](docs/korean.md)를 참고하세요.
 
-#### 1. End-to-End Document Processing
+### 사용 예제
+
+#### 1. 엔드투엔드 문서 처리
 
 ```python
 import asyncio
@@ -334,21 +349,21 @@ from lightrag.llm.openai import openai_complete_if_cache, openai_embed
 from lightrag.utils import EmbeddingFunc
 
 async def main():
-    # Set up API configuration
+    # API 구성 설정
     api_key = "your-api-key"
-    base_url = "your-base-url"  # Optional
+    base_url = "your-base-url"  # 선택 사항
 
-    # Create RAGAnything configuration
+    # RAGAnything 구성 생성
     config = RAGAnythingConfig(
         working_dir="./rag_storage",
-        parser="mineru",  # Parser selection: mineru, docling, or paddleocr
-        parse_method="auto",  # Parse method: auto, ocr, or txt
+        parser="mineru",  # 파서 선택: mineru, docling, 또는 paddleocr
+        parse_method="auto",  # 파싱 방법: auto, ocr, 또는 txt
         enable_image_processing=True,
         enable_table_processing=True,
         enable_equation_processing=True,
     )
 
-    # Define LLM model function
+    # LLM 모델 함수 정의
     def llm_model_func(prompt, system_prompt=None, history_messages=[], **kwargs):
         return openai_complete_if_cache(
             "gpt-4o-mini",
@@ -360,11 +375,11 @@ async def main():
             **kwargs,
         )
 
-    # Define vision model function for image processing
+    # 이미지 처리를 위한 비전 모델 함수 정의
     def vision_model_func(
         prompt, system_prompt=None, history_messages=[], image_data=None, messages=None, **kwargs
     ):
-        # If messages format is provided (for multimodal VLM enhanced query), use it directly
+        # messages 형식이 제공되면 (멀티모달 VLM 강화 질의용) 그대로 사용
         if messages:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -376,7 +391,7 @@ async def main():
                 base_url=base_url,
                 **kwargs,
             )
-        # Traditional single image format
+        # 전통적인 단일 이미지 형식
         elif image_data:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -406,11 +421,11 @@ async def main():
                 base_url=base_url,
                 **kwargs,
             )
-        # Pure text format
+        # 순수 텍스트 형식
         else:
             return llm_model_func(prompt, system_prompt, history_messages, **kwargs)
 
-    # Define embedding function
+    # 임베딩 함수 정의
     embedding_func = EmbeddingFunc(
         embedding_dim=3072,
         max_token_size=8192,
@@ -422,7 +437,7 @@ async def main():
         ),
     )
 
-    # Initialize RAGAnything
+    # RAGAnything 초기화
     rag = RAGAnything(
         config=config,
         llm_model_func=llm_model_func,
@@ -430,22 +445,22 @@ async def main():
         embedding_func=embedding_func,
     )
 
-    # Process a document
+    # 문서 처리
     await rag.process_document_complete(
         file_path="path/to/your/document.pdf",
         output_dir="./output",
         parse_method="auto"
     )
 
-    # Query the processed content
-    # Pure text query - for basic knowledge base search
+    # 처리된 콘텐츠 질의
+    # 순수 텍스트 질의 - 기본 지식 베이스 검색용
     text_result = await rag.aquery(
         "What are the main findings shown in the figures and tables?",
         mode="hybrid"
     )
     print("Text query result:", text_result)
 
-    # Multimodal query with specific multimodal content
+    # 특정 멀티모달 콘텐츠를 포함한 멀티모달 질의
     multimodal_result = await rag.aquery_with_multimodal(
     "Explain this formula and its relevance to the document content",
     multimodal_content=[{
@@ -461,7 +476,17 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-#### 2. Direct Multimodal Content Processing
+> **🇰🇷 한국어 프롬프트 사용:** 파이프라인 전반의 프롬프트를 한국어로 전환하려면 RAGAnything 초기화 전에 한 번 호출하세요.
+>
+> ```python
+> from raganything.prompt_manager import set_prompt_language
+>
+> set_prompt_language("ko")  # 프로세스 전역으로 한국어 프롬프트 적용
+> ```
+>
+> 자세한 내용은 [`docs/korean.md`](docs/korean.md)와 [`examples/korean_example.py`](examples/korean_example.py)를 참고하세요.
+
+#### 2. 멀티모달 콘텐츠 직접 처리
 
 ```python
 import asyncio
@@ -472,11 +497,11 @@ from lightrag.utils import EmbeddingFunc
 from raganything.modalprocessors import ImageModalProcessor, TableModalProcessor
 
 async def process_multimodal_content():
-    # Set up API configuration
+    # API 구성 설정
     api_key = "your-api-key"
-    base_url = "your-base-url"  # Optional
+    base_url = "your-base-url"  # 선택 사항
 
-    # Initialize LightRAG
+    # LightRAG 초기화
     rag = LightRAG(
         working_dir="./rag_storage",
         llm_model_func=lambda prompt, system_prompt=None, history_messages=[], **kwargs: openai_complete_if_cache(
@@ -501,7 +526,7 @@ async def process_multimodal_content():
     )
     await rag.initialize_storages()
 
-    # Process an image
+    # 이미지 처리
     image_processor = ImageModalProcessor(
         lightrag=rag,
         modal_caption_func=lambda prompt, system_prompt=None, history_messages=[], image_data=None, **kwargs: openai_complete_if_cache(
@@ -543,7 +568,7 @@ async def process_multimodal_content():
         entity_name="Experimental Results Figure"
     )
 
-    # Process a table
+    # 표 처리
     table_processor = TableModalProcessor(
         lightrag=rag,
         modal_caption_func=lambda prompt, system_prompt=None, history_messages=[], **kwargs: openai_complete_if_cache(
@@ -579,10 +604,10 @@ if __name__ == "__main__":
     asyncio.run(process_multimodal_content())
 ```
 
-#### 3. Batch Processing
+#### 3. 배치 처리
 
 ```python
-# Process multiple documents
+# 여러 문서 처리
 await rag.process_folder_complete(
     folder_path="./documents",
     output_dir="./output",
@@ -592,67 +617,67 @@ await rag.process_folder_complete(
 )
 ```
 
-#### 4. Custom Modal Processors
+#### 4. 사용자 정의 모달 프로세서
 
 ```python
 from raganything.modalprocessors import GenericModalProcessor
 
 class CustomModalProcessor(GenericModalProcessor):
     async def process_multimodal_content(self, modal_content, content_type, file_path, entity_name):
-        # Your custom processing logic
+        # 사용자 정의 처리 로직
         enhanced_description = await self.analyze_custom_content(modal_content)
         entity_info = self.create_custom_entity(enhanced_description, entity_name)
         return await self._create_entity_and_chunk(enhanced_description, entity_info, file_path)
 ```
 
-#### 5. Query Options
+#### 5. 질의 옵션
 
-RAG-Anything provides three types of query methods:
+RAG-Anything은 세 가지 유형의 질의 방법을 제공합니다:
 
-**Pure Text Queries** - Direct knowledge base search using LightRAG:
+**순수 텍스트 질의** - LightRAG를 사용한 직접 지식 베이스 검색:
 ```python
-# Different query modes for text queries
+# 텍스트 질의를 위한 다양한 질의 모드
 text_result_hybrid = await rag.aquery("Your question", mode="hybrid")
 text_result_local = await rag.aquery("Your question", mode="local")
 text_result_global = await rag.aquery("Your question", mode="global")
 text_result_naive = await rag.aquery("Your question", mode="naive")
 
-# Synchronous version
+# 동기 버전
 sync_text_result = rag.query("Your question", mode="hybrid")
 ```
 
-**VLM Enhanced Queries** - Automatically analyze images in retrieved context using VLM:
+**VLM 강화 질의** - VLM을 사용하여 검색된 문맥의 이미지를 자동 분석:
 ```python
-# VLM enhanced query (automatically enabled when vision_model_func is provided)
+# VLM 강화 질의 (vision_model_func가 제공되면 자동 활성화)
 vlm_result = await rag.aquery(
     "Analyze the charts and figures in the document",
     mode="hybrid"
-    # vlm_enhanced=True is automatically set when vision_model_func is available
+    # vision_model_func가 사용 가능할 때 vlm_enhanced=True가 자동으로 설정됨
 )
 
-# Manually control VLM enhancement
+# VLM 강화를 수동으로 제어
 vlm_enabled = await rag.aquery(
     "What do the images show in this document?",
     mode="hybrid",
-    vlm_enhanced=True  # Force enable VLM enhancement
+    vlm_enhanced=True  # VLM 강화 강제 활성화
 )
 
 vlm_disabled = await rag.aquery(
     "What do the images show in this document?",
     mode="hybrid",
-    vlm_enhanced=False  # Force disable VLM enhancement
+    vlm_enhanced=False  # VLM 강화 강제 비활성화
 )
 
-# When documents contain images, VLM can see and analyze them directly
-# The system will automatically:
-# 1. Retrieve relevant context containing image paths
-# 2. Load and encode images as base64
-# 3. Send both text context and images to VLM for comprehensive analysis
+# 문서에 이미지가 포함되어 있으면 VLM이 직접 보고 분석할 수 있습니다
+# 시스템은 자동으로 다음을 수행합니다:
+# 1. 이미지 경로를 포함한 관련 문맥 검색
+# 2. 이미지를 base64로 로드 및 인코딩
+# 3. 텍스트 문맥과 이미지를 모두 VLM에 전달하여 종합 분석
 ```
 
-**Multimodal Queries** - Enhanced queries with specific multimodal content analysis:
+**멀티모달 질의** - 특정 멀티모달 콘텐츠 분석을 포함한 강화 질의:
 ```python
-# Query with table data
+# 표 데이터를 포함한 질의
 table_result = await rag.aquery_with_multimodal(
     "Compare these performance metrics with the document content",
     multimodal_content=[{
@@ -665,7 +690,7 @@ table_result = await rag.aquery_with_multimodal(
     mode="hybrid"
 )
 
-# Query with equation content
+# 수식 콘텐츠를 포함한 질의
 equation_result = await rag.aquery_with_multimodal(
     "Explain this formula and its relevance to the document content",
     multimodal_content=[{
@@ -677,7 +702,7 @@ equation_result = await rag.aquery_with_multimodal(
 )
 ```
 
-#### 6. Loading Existing LightRAG Instance
+#### 6. 기존 LightRAG 인스턴스 불러오기
 
 ```python
 import asyncio
@@ -690,20 +715,20 @@ from lightrag.utils import EmbeddingFunc
 import os
 
 async def load_existing_lightrag():
-    # Set up API configuration
+    # API 구성 설정
     api_key = "your-api-key"
-    base_url = "your-base-url"  # Optional
+    base_url = "your-base-url"  # 선택 사항
 
-    # First, create or load existing LightRAG instance
+    # 먼저, 기존 LightRAG 인스턴스를 생성하거나 불러옵니다
     lightrag_working_dir = "./existing_lightrag_storage"
 
-    # Check if previous LightRAG instance exists
+    # 이전 LightRAG 인스턴스가 존재하는지 확인
     if os.path.exists(lightrag_working_dir) and os.listdir(lightrag_working_dir):
         print("✅ Found existing LightRAG instance, loading...")
     else:
         print("❌ No existing LightRAG instance found, will create new one")
 
-    # Create/load LightRAG instance with your configuration
+    # 구성에 맞춰 LightRAG 인스턴스 생성/불러오기
     lightrag_instance = LightRAG(
         working_dir=lightrag_working_dir,
         llm_model_func=lambda prompt, system_prompt=None, history_messages=[], **kwargs: openai_complete_if_cache(
@@ -727,15 +752,15 @@ async def load_existing_lightrag():
         )
     )
 
-    # Initialize storage (this will load existing data if available)
+    # 스토리지 초기화 (가능한 경우 기존 데이터를 불러옵니다)
     await lightrag_instance.initialize_storages()
     await initialize_pipeline_status()
 
-    # Define vision model function for image processing
+    # 이미지 처리를 위한 비전 모델 함수 정의
     def vision_model_func(
         prompt, system_prompt=None, history_messages=[], image_data=None, messages=None, **kwargs
     ):
-        # If messages format is provided (for multimodal VLM enhanced query), use it directly
+        # messages 형식이 제공되면 (멀티모달 VLM 강화 질의용) 그대로 사용
         if messages:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -747,7 +772,7 @@ async def load_existing_lightrag():
                 base_url=base_url,
                 **kwargs,
             )
-        # Traditional single image format
+        # 전통적인 단일 이미지 형식
         elif image_data:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -777,25 +802,25 @@ async def load_existing_lightrag():
                 base_url=base_url,
                 **kwargs,
             )
-        # Pure text format
+        # 순수 텍스트 형식
         else:
             return lightrag_instance.llm_model_func(prompt, system_prompt, history_messages, **kwargs)
 
-    # Now use existing LightRAG instance to initialize RAGAnything
+    # 이제 기존 LightRAG 인스턴스를 사용하여 RAGAnything 초기화
     rag = RAGAnything(
-        lightrag=lightrag_instance,  # Pass existing LightRAG instance
+        lightrag=lightrag_instance,  # 기존 LightRAG 인스턴스 전달
         vision_model_func=vision_model_func,
-        # Note: working_dir, llm_model_func, embedding_func, etc. are inherited from lightrag_instance
+        # 참고: working_dir, llm_model_func, embedding_func 등은 lightrag_instance에서 상속됩니다
     )
 
-    # Query existing knowledge base
+    # 기존 지식 베이스 질의
     result = await rag.aquery(
         "What data has been processed in this LightRAG instance?",
         mode="hybrid"
     )
     print("Query result:", result)
 
-    # Add new multimodal document to existing LightRAG instance
+    # 기존 LightRAG 인스턴스에 새로운 멀티모달 문서 추가
     await rag.process_document_complete(
         file_path="path/to/new/multimodal_document.pdf",
         output_dir="./output"
@@ -805,9 +830,9 @@ if __name__ == "__main__":
     asyncio.run(load_existing_lightrag())
 ```
 
-#### 7. Direct Content List Insertion
+#### 7. 콘텐츠 리스트 직접 삽입
 
-For scenarios where you already have a pre-parsed content list (e.g., from external parsers or previous processing), you can directly insert it into RAGAnything without document parsing:
+이미 사전 파싱된 콘텐츠 리스트가 있는 경우(예: 외부 파서 또는 이전 처리 결과), 문서 파싱 없이 RAGAnything에 직접 삽입할 수 있습니다:
 
 ```python
 import asyncio
@@ -817,11 +842,11 @@ from lightrag.llm.openai import openai_complete_if_cache, openai_embed
 from lightrag.utils import EmbeddingFunc
 
 async def insert_content_list_example():
-    # Set up API configuration
+    # API 구성 설정
     api_key = "your-api-key"
-    base_url = "your-base-url"  # Optional
+    base_url = "your-base-url"  # 선택 사항
 
-    # Create RAGAnything configuration
+    # RAGAnything 구성 생성
     config = RAGAnythingConfig(
         working_dir="./rag_storage",
         enable_image_processing=True,
@@ -829,7 +854,7 @@ async def insert_content_list_example():
         enable_equation_processing=True,
     )
 
-    # Define model functions
+    # 모델 함수 정의
     def llm_model_func(prompt, system_prompt=None, history_messages=[], **kwargs):
         return openai_complete_if_cache(
             "gpt-4o-mini",
@@ -842,7 +867,7 @@ async def insert_content_list_example():
         )
 
     def vision_model_func(prompt, system_prompt=None, history_messages=[], image_data=None, messages=None, **kwargs):
-        # If messages format is provided (for multimodal VLM enhanced query), use it directly
+        # messages 형식이 제공되면 (멀티모달 VLM 강화 질의용) 그대로 사용
         if messages:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -854,7 +879,7 @@ async def insert_content_list_example():
                 base_url=base_url,
                 **kwargs,
             )
-        # Traditional single image format
+        # 전통적인 단일 이미지 형식
         elif image_data:
             return openai_complete_if_cache(
                 "gpt-4o",
@@ -875,7 +900,7 @@ async def insert_content_list_example():
                 base_url=base_url,
                 **kwargs,
             )
-        # Pure text format
+        # 순수 텍스트 형식
         else:
             return llm_model_func(prompt, system_prompt, history_messages, **kwargs)
 
@@ -890,7 +915,7 @@ async def insert_content_list_example():
         ),
     )
 
-    # Initialize RAGAnything
+    # RAGAnything 초기화
     rag = RAGAnything(
         config=config,
         llm_model_func=llm_model_func,
@@ -898,307 +923,310 @@ async def insert_content_list_example():
         embedding_func=embedding_func,
     )
 
-    # Example: Pre-parsed content list from external source
+    # 예시: 외부 소스에서 사전 파싱된 콘텐츠 리스트
     content_list = [
         {
             "type": "text",
             "text": "This is the introduction section of our research paper.",
-            "page_idx": 0  # Page number where this content appears
+            "page_idx": 0  # 이 콘텐츠가 나타나는 페이지 번호
         },
         {
             "type": "image",
-            "img_path": "/absolute/path/to/figure1.jpg",  # IMPORTANT: Use absolute path
+            "img_path": "/absolute/path/to/figure1.jpg",  # 중요: 절대 경로 사용
             "image_caption": ["Figure 1: System Architecture"],
             "image_footnote": ["Source: Authors' original design"],
-            "page_idx": 1  # Page number where this image appears
+            "page_idx": 1  # 이 이미지가 나타나는 페이지 번호
         },
         {
             "type": "table",
             "table_body": "| Method | Accuracy | F1-Score |\n|--------|----------|----------|\n| Ours | 95.2% | 0.94 |\n| Baseline | 87.3% | 0.85 |",
             "table_caption": ["Table 1: Performance Comparison"],
             "table_footnote": ["Results on test dataset"],
-            "page_idx": 2  # Page number where this table appears
+            "page_idx": 2  # 이 표가 나타나는 페이지 번호
         },
         {
             "type": "equation",
             "latex": "P(d|q) = \\frac{P(q|d) \\cdot P(d)}{P(q)}",
             "text": "Document relevance probability formula",
-            "page_idx": 3  # Page number where this equation appears
+            "page_idx": 3  # 이 수식이 나타나는 페이지 번호
         },
         {
             "type": "text",
             "text": "In conclusion, our method demonstrates superior performance across all metrics.",
-            "page_idx": 4  # Page number where this content appears
+            "page_idx": 4  # 이 콘텐츠가 나타나는 페이지 번호
         }
     ]
 
-    # Insert the content list directly
+    # 콘텐츠 리스트 직접 삽입
     await rag.insert_content_list(
         content_list=content_list,
-        file_path="research_paper.pdf",  # Reference file name for citation
-        split_by_character=None,         # Optional text splitting
-        split_by_character_only=False,   # Optional text splitting mode
-        doc_id=None,                     # Optional custom document ID (will be auto-generated if not provided)
-        display_stats=True               # Show content statistics
+        file_path="research_paper.pdf",  # 인용용 참조 파일 이름
+        split_by_character=None,         # 선택적 텍스트 분할
+        split_by_character_only=False,   # 선택적 텍스트 분할 모드
+        doc_id=None,                     # 선택적 사용자 정의 문서 ID (제공하지 않으면 자동 생성됨)
+        display_stats=True               # 콘텐츠 통계 표시
     )
 
-    # Query the inserted content
+    # 삽입된 콘텐츠 질의
     result = await rag.aquery(
         "What are the key findings and performance metrics mentioned in the research?",
         mode="hybrid"
     )
     print("Query result:", result)
 
-    # You can also insert multiple content lists with different document IDs
+    # 서로 다른 문서 ID로 여러 콘텐츠 리스트를 삽입할 수도 있습니다
     another_content_list = [
         {
             "type": "text",
             "text": "This is content from another document.",
-            "page_idx": 0  # Page number where this content appears
+            "page_idx": 0  # 이 콘텐츠가 나타나는 페이지 번호
         },
         {
             "type": "table",
             "table_body": "| Feature | Value |\n|---------|-------|\n| Speed | Fast |\n| Accuracy | High |",
             "table_caption": ["Feature Comparison"],
-            "page_idx": 1  # Page number where this table appears
+            "page_idx": 1  # 이 표가 나타나는 페이지 번호
         }
     ]
 
     await rag.insert_content_list(
         content_list=another_content_list,
         file_path="another_document.pdf",
-        doc_id="custom-doc-id-123"  # Custom document ID
+        doc_id="custom-doc-id-123"  # 사용자 정의 문서 ID
     )
 
 if __name__ == "__main__":
     asyncio.run(insert_content_list_example())
 ```
 
-**Content List Format:**
+**콘텐츠 리스트 형식:**
 
-The `content_list` should follow the standard format with each item being a dictionary containing:
+`content_list`는 표준 형식을 따라야 하며, 각 항목은 다음을 포함하는 딕셔너리입니다:
 
-- **Text content**: `{"type": "text", "text": "content text", "page_idx": 0}`
-- **Image content**: `{"type": "image", "img_path": "/absolute/path/to/image.jpg", "image_caption": ["caption"], "image_footnote": ["note"], "page_idx": 1}`
-- **Table content**: `{"type": "table", "table_body": "markdown table", "table_caption": ["caption"], "table_footnote": ["note"], "page_idx": 2}`
-- **Equation content**: `{"type": "equation", "latex": "LaTeX formula", "text": "description", "page_idx": 3}`
-- **Generic content**: `{"type": "custom_type", "content": "any content", "page_idx": 4}`
+- **텍스트 콘텐츠**: `{"type": "text", "text": "content text", "page_idx": 0}`
+- **이미지 콘텐츠**: `{"type": "image", "img_path": "/absolute/path/to/image.jpg", "image_caption": ["caption"], "image_footnote": ["note"], "page_idx": 1}`
+- **표 콘텐츠**: `{"type": "table", "table_body": "markdown table", "table_caption": ["caption"], "table_footnote": ["note"], "page_idx": 2}`
+- **수식 콘텐츠**: `{"type": "equation", "latex": "LaTeX formula", "text": "description", "page_idx": 3}`
+- **일반 콘텐츠**: `{"type": "custom_type", "content": "any content", "page_idx": 4}`
 
-**Important Notes:**
-- **`img_path`**: Must be an absolute path to the image file (e.g., `/home/user/images/chart.jpg` or `C:\Users\user\images\chart.jpg`)
-- **`page_idx`**: Represents the page number where the content appears in the original document (0-based indexing)
-- **Content ordering**: Items are processed in the order they appear in the list
+**중요 참고 사항:**
+- **`img_path`**: 이미지 파일의 절대 경로여야 합니다(예: `/home/user/images/chart.jpg` 또는 `C:\Users\user\images\chart.jpg`)
+- **`page_idx`**: 원본 문서에서 콘텐츠가 나타나는 페이지 번호를 나타냅니다(0부터 시작하는 인덱싱)
+- **콘텐츠 순서**: 항목은 리스트에 나타나는 순서대로 처리됩니다
 
-This method is particularly useful when:
-- You have content from external parsers (non-MinerU/Docling)
-- You want to process programmatically generated content
-- You need to insert content from multiple sources into a single knowledge base
-- You have cached parsing results that you want to reuse
+이 방법은 다음과 같은 경우에 특히 유용합니다:
+- 외부 파서(MinerU/Docling 이외)에서 가져온 콘텐츠가 있는 경우
+- 프로그래밍 방식으로 생성된 콘텐츠를 처리하려는 경우
+- 여러 소스의 콘텐츠를 단일 지식 베이스에 삽입해야 하는 경우
+- 재사용하려는 캐시된 파싱 결과가 있는 경우
 
 ---
 
-## 🛠️ Examples
+## 🛠️ 예제
 
-*Practical Implementation Demos*
+*실용적인 구현 데모*
 
 <div align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212257455-13e3e01e-d6a6-45dc-bb92-3ab87b12dfc1.gif" width="300">
 </div>
 
-The `examples/` directory contains comprehensive usage examples:
+`examples/` 디렉터리에는 포괄적인 사용 예제가 포함되어 있습니다:
 
-- **`raganything_example.py`**: End-to-end document processing with MinerU
-- **`modalprocessors_example.py`**: Direct multimodal content processing
-- **`office_document_test.py`**: Office document parsing test with MinerU (no API key required)
-- **`image_format_test.py`**: Image format parsing test with MinerU (no API key required)
-- **`text_format_test.py`**: Text format parsing test with MinerU (no API key required)
+- **`raganything_example.py`**: MinerU를 사용한 엔드투엔드 문서 처리
+- **`modalprocessors_example.py`**: 멀티모달 콘텐츠 직접 처리
+- **`office_document_test.py`**: MinerU를 사용한 Office 문서 파싱 테스트 (API 키 불필요)
+- **`image_format_test.py`**: MinerU를 사용한 이미지 형식 파싱 테스트 (API 키 불필요)
+- **`text_format_test.py`**: MinerU를 사용한 텍스트 형식 파싱 테스트 (API 키 불필요)
+- **`korean_example.py`**: 한국어 프롬프트·임베딩·OCR 설정을 적용한 한국어 처리 예제
 
-**Run examples:**
+**예제 실행:**
 
 ```bash
-# End-to-end processing with parser selection
+# 파서 선택을 포함한 엔드투엔드 처리
 python examples/raganything_example.py path/to/document.pdf --api-key YOUR_API_KEY --parser mineru
 
-# Direct modal processing
+# 직접 모달 처리
 python examples/modalprocessors_example.py --api-key YOUR_API_KEY
 
-# Office document parsing test (MinerU only)
+# Office 문서 파싱 테스트 (MinerU 전용)
 python examples/office_document_test.py --file path/to/document.docx
 
-# Image format parsing test (MinerU only)
+# 이미지 형식 파싱 테스트 (MinerU 전용)
 python examples/image_format_test.py --file path/to/image.bmp
 
-# Text format parsing test (MinerU only)
+# 텍스트 형식 파싱 테스트 (MinerU 전용)
 python examples/text_format_test.py --file path/to/document.md
 
-# Check LibreOffice installation
+# LibreOffice 설치 확인
 python examples/office_document_test.py --check-libreoffice --file dummy
 
-# Check PIL/Pillow installation
+# PIL/Pillow 설치 확인
 python examples/image_format_test.py --check-pillow --file dummy
 
-# Check ReportLab installation
+# ReportLab 설치 확인
 python examples/text_format_test.py --check-reportlab --file dummy
 ```
 
 ---
 
-## 🔧 Configuration
+## 🔧 구성
 
-*System Optimization Parameters*
+*시스템 최적화 매개변수*
 
-### Environment Variables
+### 환경 변수
 
-Create a `.env` file (refer to `.env.example`):
+`.env` 파일을 생성하세요(`.env.example` 참고):
 
 ```bash
 OPENAI_API_KEY=your_openai_api_key
-OPENAI_BASE_URL=your_base_url  # Optional
-OUTPUT_DIR=./output             # Default output directory for parsed documents
-PARSER=mineru                   # Parser selection: mineru, docling, or paddleocr
-PARSE_METHOD=auto              # Parse method: auto, ocr, or txt
+OPENAI_BASE_URL=your_base_url  # 선택 사항
+OUTPUT_DIR=./output             # 파싱된 문서의 기본 출력 디렉터리
+PARSER=mineru                   # 파서 선택: mineru, docling, 또는 paddleocr
+PARSE_METHOD=auto              # 파싱 방법: auto, ocr, 또는 txt
 ```
 
-**Note:** For backward compatibility, legacy environment variable names are still supported:
-- `MINERU_PARSE_METHOD` is deprecated, please use `PARSE_METHOD`
+**참고:** 하위 호환성을 위해 레거시 환경 변수 이름도 여전히 지원됩니다:
+- `MINERU_PARSE_METHOD`는 더 이상 사용되지 않으므로 `PARSE_METHOD`를 사용하세요
 
-> **Note**: API keys are only required for full RAG processing with LLM integration. The parsing test files (`office_document_test.py` and `image_format_test.py`) only test parser functionality and do not require API keys.
+> **참고**: API 키는 LLM 통합을 포함한 전체 RAG 처리에만 필요합니다. 파싱 테스트 파일(`office_document_test.py` 및 `image_format_test.py`)은 파서 기능만 테스트하며 API 키가 필요하지 않습니다.
 
-### Troubleshooting and multimodal checklist
+### 문제 해결 및 멀티모달 체크리스트
 
-- See **[docs/multimodal_rag_failure_modes.md](docs/multimodal_rag_failure_modes.md)** for a short checklist of common pipeline issues (OCR, tables, retrieval bias, debugging tips). Related: [#207](https://github.com/HKUDS/RAG-Anything/issues/207), [#213](https://github.com/HKUDS/RAG-Anything/issues/213).
+- 일반적인 파이프라인 이슈(OCR, 표, 검색 편향, 디버깅 팁)에 대한 짧은 체크리스트는 **[docs/multimodal_rag_failure_modes.md](docs/multimodal_rag_failure_modes.md)**를 참고하세요. 관련 이슈: [#207](https://github.com/HKUDS/RAG-Anything/issues/207), [#213](https://github.com/HKUDS/RAG-Anything/issues/213).
 
-### Public media URLs (CDN / object storage)
+### 공개 미디어 URL (CDN / 오브젝트 스토리지)
 
-When ingestion runs on a server but your UI or another service needs **HTTPS** (or S3-style) links to figures, set:
+수집(ingestion)이 서버에서 실행되지만 UI나 다른 서비스에서 그림에 대한 **HTTPS**(또는 S3 스타일) 링크가 필요한 경우 다음을 설정하세요:
 
 ```bash
-# Base URL for assets (no trailing slash required)
+# 에셋의 기본 URL (끝에 슬래시 불필요)
 RAGANYTHING_PUBLIC_ASSET_BASE_URL=https://my-bucket.s3.us-east-1.amazonaws.com/prefix
-# Filesystem root that should be stripped from absolute paths under that tree
+# 해당 트리 아래의 절대 경로에서 제거할 파일 시스템 루트
 RAGANYTHING_PUBLIC_ASSET_STRIP_PREFIX=/var/rag/output
 ```
 
-After parsing, each non-empty `img_path`, `table_img_path`, or `equation_img_path` may gain a sibling field `*_public_url` while the original path stays on disk for local processing. See [#272](https://github.com/HKUDS/RAG-Anything/issues/272).
+파싱 후, 비어 있지 않은 각 `img_path`, `table_img_path`, `equation_img_path`에 형제 필드 `*_public_url`이 추가될 수 있으며, 원본 경로는 로컬 처리를 위해 디스크에 그대로 유지됩니다. [#272](https://github.com/HKUDS/RAG-Anything/issues/272)를 참고하세요.
 
-> **Scope today**: this mapping runs in the MinerU parser path only. Other parsers (e.g. Docling) keep working but will not produce `*_public_url` fields until the helper is wired into their content_list post-processing as well. If only one of the two env vars is set, RAG-Anything logs a warning and skips URL attachment.
+> **현재 적용 범위**: 이 매핑은 MinerU 파서 경로에서만 실행됩니다. 다른 파서(예: Docling)는 계속 작동하지만, 해당 헬퍼가 content_list 후처리에 연결되기 전까지는 `*_public_url` 필드를 생성하지 않습니다. 두 환경 변수 중 하나만 설정된 경우 RAG-Anything은 경고를 기록하고 URL 첨부를 건너뜁니다.
 
-### Parser Configuration
+### 파서 구성
 
-RAGAnything now supports multiple parsers, each with specific advantages:
+RAGAnything은 이제 각각 고유한 장점을 가진 여러 파서를 지원합니다:
 
-#### MinerU Parser
-- Supports PDF, images, Office documents, and more formats
-- Powerful OCR and table extraction capabilities
-- GPU acceleration support
+#### MinerU 파서
+- PDF, 이미지, Office 문서 등 다양한 형식 지원
+- 강력한 OCR 및 표 추출 기능
+- GPU 가속 지원
 
-#### Docling Parser
-- Optimized for Office documents and HTML files
-- Better document structure preservation
-- Native support for multiple Office formats
+#### Docling 파서
+- Office 문서 및 HTML 파일에 최적화
+- 더 나은 문서 구조 보존
+- 여러 Office 형식에 대한 네이티브 지원
 
-#### PaddleOCR Parser
-- OCR-focused parser for images and PDFs
-- Produces text blocks compatible with existing `content_list` processing
-- Supports optional Office/TXT/MD parsing by converting to PDF first
+#### PaddleOCR 파서
+- 이미지 및 PDF를 위한 OCR 중심 파서
+- 기존 `content_list` 처리와 호환되는 텍스트 블록 생성
+- 먼저 PDF로 변환하여 Office/TXT/MD 파싱을 선택적으로 지원
 
-Install PaddleOCR parser extras:
+PaddleOCR 파서 extras 설치:
 
 ```bash
 pip install -e ".[paddleocr]"
-# or
+# 또는
 uv sync --extra paddleocr
 ```
 
-> **Note**: PaddleOCR also requires `paddlepaddle` (CPU/GPU package varies by platform). Install it with the official guide: https://www.paddlepaddle.org.cn/install/quick
+> **참고**: PaddleOCR은 `paddlepaddle`도 필요합니다(CPU/GPU 패키지는 플랫폼에 따라 다름). 공식 가이드에 따라 설치하세요: https://www.paddlepaddle.org.cn/install/quick
 
-### MinerU Configuration
+### MinerU 구성
 
 ```bash
-# MinerU 2.0 uses command-line parameters instead of config files
-# Check available options:
+# MinerU 2.0은 설정 파일 대신 명령줄 매개변수를 사용합니다
+# 사용 가능한 옵션 확인:
 mineru --help
 
-# Common configurations:
-mineru -p input.pdf -o output_dir -m auto    # Automatic parsing mode
-mineru -p input.pdf -o output_dir -m ocr     # OCR-focused parsing
-mineru -p input.pdf -o output_dir -b pipeline --device cuda  # GPU acceleration
+# 일반적인 구성:
+mineru -p input.pdf -o output_dir -m auto    # 자동 파싱 모드
+mineru -p input.pdf -o output_dir -m ocr     # OCR 중심 파싱
+mineru -p input.pdf -o output_dir -b pipeline --device cuda  # GPU 가속
 ```
 
-You can also configure parsing through RAGAnything parameters:
+RAGAnything 매개변수를 통해서도 파싱을 구성할 수 있습니다:
 
 ```python
-# Basic parsing configuration with parser selection
+# 파서 선택을 포함한 기본 파싱 구성
 await rag.process_document_complete(
     file_path="document.pdf",
     output_dir="./output/",
-    parse_method="auto",          # or "ocr", "txt"
-    parser="mineru"               # Optional: "mineru", "docling", or "paddleocr"
+    parse_method="auto",          # 또는 "ocr", "txt"
+    parser="mineru"               # 선택 사항: "mineru", "docling", 또는 "paddleocr"
 )
 
-# Advanced parsing configuration with special parameters
+# 특수 매개변수를 포함한 고급 파싱 구성
 await rag.process_document_complete(
     file_path="document.pdf",
     output_dir="./output/",
-    parse_method="auto",          # Parsing method: "auto", "ocr", "txt"
-    parser="mineru",              # Parser selection: "mineru", "docling", or "paddleocr"
+    parse_method="auto",          # 파싱 방법: "auto", "ocr", "txt"
+    parser="mineru",              # 파서 선택: "mineru", "docling", 또는 "paddleocr"
 
-    # MinerU special parameters - all supported kwargs:
-    lang="ch",                   # Document language for OCR optimization (e.g., "ch", "en", "ja")
-    device="cuda:0",             # Inference device: "cpu", "cuda", "cuda:0", "npu", "mps"
-    start_page=0,                # Starting page number (0-based, for PDF)
-    end_page=10,                 # Ending page number (0-based, for PDF)
-    formula=True,                # Enable formula parsing
-    table=True,                  # Enable table parsing
-    backend="pipeline",          # Parsing backend: pipeline|hybrid-auto-engine|hybrid-http-client|vlm-auto-engine|vlm-http-client.
-    source="huggingface",        # Model source: "huggingface", "modelscope", "local"
-    # vlm_url="http://127.0.0.1:3000" # Service address when using backend=vlm-http-client
+    # MinerU 특수 매개변수 - 지원되는 모든 kwargs:
+    lang="ch",                   # OCR 최적화를 위한 문서 언어 (예: "ch", "en", "ja", "korean")
+    device="cuda:0",             # 추론 장치: "cpu", "cuda", "cuda:0", "npu", "mps"
+    start_page=0,                # 시작 페이지 번호 (0부터 시작, PDF용)
+    end_page=10,                 # 끝 페이지 번호 (0부터 시작, PDF용)
+    formula=True,                # 수식 파싱 활성화
+    table=True,                  # 표 파싱 활성화
+    backend="pipeline",          # 파싱 백엔드: pipeline|hybrid-auto-engine|hybrid-http-client|vlm-auto-engine|vlm-http-client.
+    source="huggingface",        # 모델 소스: "huggingface", "modelscope", "local"
+    # vlm_url="http://127.0.0.1:3000" # backend=vlm-http-client 사용 시 서비스 주소
 
-    # Standard RAGAnything parameters
-    display_stats=True,          # Display content statistics
-    split_by_character=None,     # Optional character to split text by
-    doc_id=None                  # Optional document ID
+    # 표준 RAGAnything 매개변수
+    display_stats=True,          # 콘텐츠 통계 표시
+    split_by_character=None,     # 텍스트를 분할할 선택적 문자
+    doc_id=None                  # 선택적 문서 ID
 )
 ```
 
-> **Note**: MinerU 2.0 no longer uses the `magic-pdf.json` configuration file. All settings are now passed as command-line parameters or function arguments. RAG-Anything supports multiple document parsers, including MinerU, Docling, and PaddleOCR.
+> **참고**: MinerU 2.0은 더 이상 `magic-pdf.json` 설정 파일을 사용하지 않습니다. 모든 설정은 이제 명령줄 매개변수 또는 함수 인자로 전달됩니다. RAG-Anything은 MinerU, Docling, PaddleOCR을 포함한 여러 문서 파서를 지원합니다.
 
-### Processing Requirements
+> **🇰🇷 한국어 OCR 팁**: 한국어 문서를 처리할 때는 `lang="korean"`을 전달하여 OCR 정확도를 높이세요. 한국어 임베딩 모델(예: `BAAI/bge-m3`, `nlpai-lab/KURE-v1`)과 함께 사용하면 한국어 검색 품질이 향상됩니다. 자세한 내용은 [`docs/korean.md`](docs/korean.md)를 참고하세요.
 
-Different content types require specific optional dependencies:
+### 처리 요구 사항
 
-- **Office Documents** (.doc, .docx, .ppt, .pptx, .xls, .xlsx): Install [LibreOffice](https://www.libreoffice.org/download/download/)
-- **Extended Image Formats** (.bmp, .tiff, .gif, .webp): Install with `pip install raganything[image]`
-- **Text Files** (.txt, .md): Install with `pip install raganything[text]`
-- **PaddleOCR Parser** (`parser="paddleocr"`): Install with `pip install raganything[paddleocr]`, then install `paddlepaddle` for your platform
+서로 다른 콘텐츠 유형은 특정 선택적 의존성을 필요로 합니다:
 
-> **📋 Quick Install**: Use `pip install raganything[all]` to enable all format support (Python dependencies only - LibreOffice still needs separate installation)
+- **Office 문서** (.doc, .docx, .ppt, .pptx, .xls, .xlsx): [LibreOffice](https://www.libreoffice.org/download/download/) 설치
+- **확장 이미지 형식** (.bmp, .tiff, .gif, .webp): `pip install raganything[image]`로 설치
+- **텍스트 파일** (.txt, .md): `pip install raganything[text]`로 설치
+- **PaddleOCR 파서** (`parser="paddleocr"`): `pip install raganything[paddleocr]`로 설치한 뒤, 플랫폼에 맞는 `paddlepaddle` 설치
 
----
-
-## 🧪 Supported Content Types
-
-### Document Formats
-
-- **PDFs** - Research papers, reports, presentations
-- **Office Documents** - DOC, DOCX, PPT, PPTX, XLS, XLSX
-- **Images** - JPG, PNG, BMP, TIFF, GIF, WebP
-- **Text Files** - TXT, MD
-
-### Multimodal Elements
-
-- **Images** - Photographs, diagrams, charts, screenshots
-- **Tables** - Data tables, comparison charts, statistical summaries
-- **Equations** - Mathematical formulas in LaTeX format
-- **Generic Content** - Custom content types via extensible processors
-
-*For installation of format-specific dependencies, see the [Configuration](#-configuration) section.*
+> **📋 빠른 설치**: 모든 형식 지원을 활성화하려면 `pip install raganything[all]`을 사용하세요(Python 의존성만 해당 — LibreOffice는 여전히 별도 설치 필요)
 
 ---
 
-## 📖 Citation
+## 🧪 지원 콘텐츠 유형
 
-*Academic Reference*
+### 문서 형식
+
+- **PDF** - 연구 논문, 보고서, 프레젠테이션
+- **Office 문서** - DOC, DOCX, PPT, PPTX, XLS, XLSX
+- **이미지** - JPG, PNG, BMP, TIFF, GIF, WebP
+- **텍스트 파일** - TXT, MD
+
+### 멀티모달 요소
+
+- **이미지** - 사진, 다이어그램, 차트, 스크린샷
+- **표** - 데이터 표, 비교 차트, 통계 요약
+- **수식** - LaTeX 형식의 수학 공식
+- **일반 콘텐츠** - 확장형 프로세서를 통한 사용자 정의 콘텐츠 유형
+
+*형식별 의존성 설치는 [구성](#-구성) 섹션을 참고하세요.*
+
+---
+
+## 📖 인용
+
+*학술 참조*
 
 <div align="center">
   <div style="width: 60px; height: 60px; margin: 20px auto; position: relative;">
@@ -1209,7 +1237,7 @@ Different content types require specific optional dependencies:
   </div>
 </div>
 
-If you find RAG-Anything useful in your research, please cite our paper:
+연구에 RAG-Anything이 유용하다고 판단되면, 다음 논문을 인용해 주세요:
 
 ```bibtex
 @misc{guo2025raganythingallinoneragframework,
@@ -1225,9 +1253,9 @@ If you find RAG-Anything useful in your research, please cite our paper:
 
 ---
 
-## 🔗 Related Projects
+## 🔗 관련 프로젝트
 
-*Ecosystem & Extensions*
+*생태계 및 확장*
 
 <div align="center">
   <table>
@@ -1267,7 +1295,7 @@ If you find RAG-Anything useful in your research, please cite our paper:
 
 ## ⭐ Star History
 
-*Community Growth Trajectory*
+*커뮤니티 성장 추이*
 
 <div align="center">
   <a href="https://star-history.com/#HKUDS/RAG-Anything&Date">
@@ -1281,12 +1309,12 @@ If you find RAG-Anything useful in your research, please cite our paper:
 
 ---
 
-## 🤝 Contribution
+## 🤝 기여
 
-*Join the Innovation*
+*혁신에 함께하세요*
 
 <div align="center">
-  We thank all our contributors for their valuable contributions.
+  소중한 기여를 해주신 모든 기여자분께 감사드립니다.
 </div>
 
 <div align="center">
@@ -1324,3 +1352,5 @@ If you find RAG-Anything useful in your research, please cite our paper:
     <div style="margin-top: 10px; color: #00d9ff; font-size: 16px;">Building the Future of Multimodal AI</div>
   </div>
 </div>
+</content>
+</invoke>
