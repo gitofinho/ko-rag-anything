@@ -58,6 +58,10 @@ def _lazy_load_language(lang: str) -> Dict[str, Any]:
         from raganything.prompts_zh import PROMPTS_ZH
 
         return PROMPTS_ZH
+    if lang == "ko":
+        from raganything.prompts_ko import PROMPTS_KO
+
+        return PROMPTS_KO
     return {}
 
 
@@ -152,5 +156,5 @@ def get_available_languages() -> list[str]:
     here until they are first used or explicitly registered.
     """
     # Include known lazy-loadable languages
-    all_langs = set(_PROMPT_LANGUAGES.keys()) | {"zh"}
+    all_langs = set(_PROMPT_LANGUAGES.keys()) | {"zh", "ko"}
     return sorted(all_langs)
