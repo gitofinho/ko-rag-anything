@@ -458,6 +458,14 @@ class ProcessorMixin:
         # Choose appropriate parsing method based on file extension
         ext = file_path.suffix.lower()
 
+        # Lazy/local import so a missing optional HWP backend does not break
+        # module import for users that never process HWP/HWPX files.
+        from raganything.hwp import (
+            HWP_EXTENSIONS,
+            HwpConversionError,
+            convert_hwp_to_markdown,
+        )
+
         try:
             doc_parser = getattr(self, "doc_parser", None)
             if doc_parser is None:
@@ -524,6 +532,33 @@ class ProcessorMixin:
                 content_list = await asyncio.to_thread(
                     doc_parser.parse_office_doc,
                     doc_path=file_path,
+                    output_dir=output_dir,
+                    **kwargs,
+                )
+            elif ext in HWP_EXTENSIONS:
+                self.logger.info(
+                    "Detected HWP/HWPX file, converting to Markdown (lightweight path)..."
+                )
+                try:
+                    md_path = await asyncio.to_thread(
+                        convert_hwp_to_markdown,
+                        file_path,
+                        output_dir=output_dir,
+                    )
+                except HwpConversionError as e:
+                    self.logger.error(f"HWP/HWPX conversion failed: {e}")
+                    raise
+                # Re-route the converted Markdown through the same generic
+                # parser path that .md/.txt files use.
+                file_path = Path(md_path)
+                ext = file_path.suffix.lower()
+                self.logger.info(
+                    f"Using generic parser for converted {ext} file (method={parse_method})..."
+                )
+                content_list = await asyncio.to_thread(
+                    doc_parser.parse_document,
+                    file_path=file_path,
+                    method=parse_method,
                     output_dir=output_dir,
                     **kwargs,
                 )
