@@ -48,7 +48,7 @@ pip install sentence-transformers
 ```
 
 - `kiwipiepy`는 **선택 사항**이다. 설치되어 있으면 `raganything.korean_utils`의 형태소 기반 기능이 활성화되고, 없으면 정규식 기반 순수 파이썬 폴백으로 동작한다(정확도는 낮지만 추가 설치 없이 작동).
-- 한국어 임베딩 모델(아래 6절 참고)을 OpenAI 같은 외부 API 대신 로컬에서 실행하려면 `sentence-transformers`(또는 모델이 요구하는 런타임)가 필요하다.
+- 한국어 임베딩 모델(아래 7절 참고)을 OpenAI 같은 외부 API 대신 로컬에서 실행하려면 `sentence-transformers`(또는 모델이 요구하는 런타임)가 필요하다.
 
 > Office 문서(.doc/.docx/.ppt/.pptx/.xls/.xlsx) 처리는 영어판과 동일하게 LibreOffice 설치가 필요하다. 자세한 내용은 [README.md](../README.md)의 Configuration 절을 참고하라.
 
@@ -176,7 +176,7 @@ await rag.process_document_complete(
 한국어 문서 처리 팁:
 
 - **텍스트 레이어 유무 판단**: 디지털 PDF(복사 가능한 텍스트)는 `parse_method="auto"`로 충분하고 빠르다. 스캔본·이미지 PDF만 `parse_method="ocr"`로 강제한다.
-- **`lang` 값**: MinerU OCR 언어 코드로 한국어는 `"korean"`을 사용한다(영어 위주 문서는 `"en"`). 혼합 문서는 5절·7절의 FAQ를 참고하라.
+- **`lang` 값**: MinerU OCR 언어 코드로 한국어는 `"korean"`을 사용한다(영어 위주 문서는 `"en"`). 혼합 문서는 5절·8절의 FAQ를 참고하라.
 - **이미지 단일 파일**(JPG/PNG 등)도 같은 방식으로 `lang="korean"`을 지정해 OCR 정확도를 높인다.
 - **GPU 가속**: 대량 문서는 `device="cuda:0"` 등을 함께 넘기면 OCR 속도가 크게 개선된다.
 
@@ -184,7 +184,78 @@ await rag.process_document_complete(
 
 ---
 
-## 6. 한국어 임베딩 모델
+## 6. 한글(HWP/HWPX) 문서 처리
+
+### 왜 필요한가
+
+공공기관·관공서·학술 자료 상당수가 한글(HWP/HWPX) 형식으로 배포된다. 그런데 기본 파이프라인의 핵심 파서인 MinerU는 PDF·이미지·Office 문서를 다룰 뿐 HWP/HWPX는 직접 지원하지 않는다. 그래서 한글 문서를 그대로 넣으면 파싱 단계에서 막힌다. ko-rag-anything은 이 공백을 메우기 위한 **경량 폴백(lightweight fallback)** 변환기를 내장한다.
+
+### 동작 방식(현재 구현 = 경량 폴백)
+
+확장자가 `.hwp`(HWP v5 바이너리)이거나 `.hwpx`(OWPML, 개방형 XML zip)이면 자동으로 감지해 **Markdown으로 먼저 변환**한 뒤, 변환된 `.md`를 기존 마크다운 인덱싱 경로로 그대로 흘려보낸다. 즉 별도 분기를 의식할 필요 없이 `.md`/`.txt`와 동일한 일반 경로를 타게 된다.
+
+- **`.hwpx`** — 표준 라이브러리만으로 처리된다(zip + XML 파싱). 추가 설치가 필요 없다.
+- **`.hwp`** — HWP v5 바이너리를 읽기 위해 `pyhwp`가 필요하다. 선택 의존성이므로 한글 `.hwp` 문서를 처리할 때만 설치하면 된다.
+
+```bash
+# .hwp(바이너리) 변환에만 필요한 선택 의존성
+pip install pyhwp
+```
+
+### 사용법
+
+별도 설정 없이 `.hwp`/`.hwpx` 파일 경로를 그대로 `process_document_complete(...)`에 넘기면 위 라우팅이 자동으로 적용된다.
+
+```python
+# .hwp / .hwpx 도 PDF·이미지와 똑같이 넘기면 된다 (자동 라우팅)
+await rag.process_document_complete(
+    file_path="공고문.hwp",     # 또는 "보고서.hwpx"
+    output_dir="./output",
+)
+```
+
+배치 처리에서도 인식되도록 `RAGAnythingConfig`의 `SUPPORTED_FILE_EXTENSIONS` 기본값에 `.hwp,.hwpx`가 이미 포함되어 있다(폴더 일괄 처리 시 한글 문서가 자동으로 대상에 잡힌다).
+
+인덱싱까지 가지 않고 **변환만** 직접 하고 싶다면 변환 함수를 호출한다. 생성된 `.md` 파일 경로를 문자열로 반환한다.
+
+```python
+from raganything.hwp import convert_hwp_to_markdown
+
+# convert_hwp_to_markdown(file_path, output_dir=None) -> str
+md_path = convert_hwp_to_markdown("문서.hwp")
+print(md_path)  # -> 생성된 .md 파일 경로
+```
+
+`output_dir`을 생략하면 적당한 위치에 변환 결과를 두고 그 경로를 돌려준다. 필요한 백엔드가 설치되어 있지 않거나 변환에 실패하면 `HwpConversionError`가 발생한다.
+
+```python
+from raganything.hwp import (
+    HWP_EXTENSIONS,        # {".hwp", ".hwpx"} — 라우팅에 쓰이는 확장자 집합
+    HwpConversionError,
+    convert_hwp_to_markdown,
+)
+
+try:
+    md_path = convert_hwp_to_markdown("문서.hwp", output_dir="./output")
+except HwpConversionError as e:
+    print(f"변환 실패: {e}")  # 예: pyhwp 미설치, 손상된 파일 등
+```
+
+### 한계와 권장
+
+현재 경량 경로는 **텍스트와 기본 표 위주**다. 복잡한 표·이미지·수식이 많은 문서는 충실도(fidelity)가 낮아질 수 있다. 다음 사항을 권장한다.
+
+- **표·도표가 많은 문서**: 향후 고품질 경로(**LibreOffice + H2Orestart → PDF → MinerU**)가 권장되나, 이는 **아직 미구현인 향후 계획**이다. 현 시점에서는 경량 폴백만 제공된다.
+- **다국어·한자 혼용 문서**: 검색 품질은 임베딩 모델 선택에 크게 좌우된다. 상단 [7절 한국어 임베딩 모델](#7-한국어-임베딩-모델) 및 혼합 언어 관련 팁(아래 FAQ)을 참고해 다국어 임베딩(`BAAI/bge-m3` 등)을 선택한다.
+
+### FAQ
+
+- **`.hwp` 변환이 안 될 때** — `pyhwp`가 설치되어 있는지 확인한다(`pip install pyhwp`). `.hwp` 바이너리 경로는 이 백엔드가 없으면 `HwpConversionError`로 실패한다.
+- **`.hwpx`가 깨질 때** — 파일이 표준 OWPML(zip + XML) 형식인지 확인한다. 손상되었거나 비표준으로 저장된 `.hwpx`는 표준 라이브러리 파서가 읽지 못할 수 있다.
+
+---
+
+## 7. 한국어 임베딩 모델
 
 검색 품질은 한국어를 잘 표현하는 임베딩 모델 선택에 거의 전적으로 좌우된다. 권장 모델:
 
@@ -233,7 +304,7 @@ rag = RAGAnything(
 
 ---
 
-## 7. 비용/성능 팁 & 자주 묻는 질문(FAQ)
+## 8. 비용/성능 팁 & 자주 묻는 질문(FAQ)
 
 ### 청크 크기
 
@@ -260,7 +331,7 @@ rag = RAGAnything(
 
 ---
 
-## 8. 참고
+## 9. 참고
 
 - 한국어 README: [README_ko.md](../README_ko.md)
 - 한국어 예제 스크립트: [`examples/korean_example.py`](../examples/korean_example.py)
