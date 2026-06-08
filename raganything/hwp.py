@@ -1,41 +1,58 @@
 """
-HWP / HWPX → Markdown converter (lightweight fallback path)
-한글(HWP/HWPX) → 마크다운 변환기 (경량 폴백 경로)
+HWP / HWPX → Markdown converter
+한글(HWP/HWPX/HWPML) → 마크다운 변환기
 
-This module provides a *self-contained, low-dependency* path for turning Korean
-Hangul word-processor documents into Markdown so they can flow through the rest
-of the RAG pipeline. It deliberately favors portability over perfect fidelity:
+This module turns Korean Hangul word-processor documents into Markdown so they
+can flow through the rest of the RAG pipeline. It uses a two-tier strategy:
 
-* ``.hwpx`` (OWPML) is a zip of XML and is parsed with **the standard library
-  only** (:mod:`zipfile` + :mod:`xml.etree.ElementTree`). No lxml, no external
-  tools — it works on a clean Python 3.10+ install.
-* ``.hwp`` (the older HWP v5 OLE/CFBF binary) is *not* something the stdlib can
-  decode on its own. We lazily invoke the optional ``pyhwp`` package (which
-  ships the ``hwp5`` Python package plus the ``hwp5html`` / ``hwp5txt`` CLIs).
-  When ``pyhwp`` is absent we raise a clear, actionable error instead of failing
-  obscurely.
+1. **High-fidelity path — the ``kordoc`` CLI (preferred).** When the Node.js
+   ``kordoc`` tool is resolvable it is used for every supported format. It covers
+   the widest range (``.hwp`` v5, legacy HWP3, ``.hwpx``, ``.hwpml``), and
+   preserves nested tables and cell spans far better than the built-in parser.
+   kordoc prints Markdown to *stdout*; we capture it directly (no temp ``-o``
+   file), so path handling stays simple and robust.
+2. **Lightweight fallback — pure-Python (always available).** When kordoc is not
+   installed (or fails on a given file) we fall back to a self-contained parser:
 
-이 모듈은 한글 문서를 마크다운으로 바꾸는 *경량* 경로입니다. 이식성을 우선해
-``.hwpx``는 표준 라이브러리만으로 파싱하고, ``.hwp``(구형 OLE 바이너리)는 선택
-의존성 ``pyhwp``를 지연 호출합니다. ``pyhwp``가 없으면 설치 안내가 포함된 명확한
-오류를 발생시킵니다.
+   * ``.hwpx`` (OWPML) is a zip of XML and is parsed with **the standard library
+     only** (:mod:`zipfile` + :mod:`xml.etree.ElementTree`). No lxml, no external
+     tools — it works on a clean Python 3.10+ install.
+   * ``.hwp`` (the older HWP v5 OLE/CFBF binary) cannot be decoded by the stdlib
+     alone; we lazily invoke the optional ``pyhwp`` package (which ships the
+     ``hwp5`` package plus the ``hwp5html`` / ``hwp5txt`` CLIs). When ``pyhwp``
+     is absent we raise a clear, actionable error instead of failing obscurely.
 
-High-fidelity conversion (고품질 변환) — using LibreOffice to render HWP → PDF and
-then MinerU for layout-aware extraction — is intentionally **out of scope** here
-and is handled by a separate, heavier path. This module is the lightweight
-fallback that runs anywhere.
+이 모듈은 한글 문서를 마크다운으로 바꿉니다. 1순위로 Node.js ``kordoc`` CLI를
+사용해 ``.hwp``/HWP3/``.hwpx``/``.hwpml``을 고품질로 변환하고(중첩표·셀 병합
+보존), kordoc이 없거나 실패하면 순수 파이썬 경량 변환기로 폴백합니다. 경량
+경로는 ``.hwpx``를 표준 라이브러리만으로, ``.hwp``는 선택 의존성 ``pyhwp``로
+처리합니다.
 
-Optional install (선택 설치)::
+kordoc 명령 해석 순서 / 환경 변수:
 
-    pip install pyhwp
+* ``KORDOC_CMD`` — 호출 커맨드 직접 지정(예: ``"npx -y kordoc"`` 또는 절대경로).
+* PATH 상의 ``kordoc`` 실행파일(전역 설치) → ``npx --no-install kordoc``(이미
+  캐시된 경우만, 무단 네트워크 설치 방지).
+* ``KO_RAG_KORDOC_AUTO_INSTALL`` 가 켜져 있으면 ``npx -y kordoc``(최초 1회 설치
+  가능)을 허용.
+* ``KO_RAG_DISABLE_KORDOC`` 가 켜져 있으면 kordoc을 건너뛰고 경량 경로만 사용.
+* ``KO_RAG_KORDOC_TIMEOUT`` — kordoc 호출 타임아웃(초, 기본 300).
 
-Whether the ``hwp5`` package (pyhwp) is importable is exposed as the module-level
-boolean :data:`PYHWP_AVAILABLE` so callers can branch on it.
+Optional installs (선택 설치)::
+
+    npm install -g kordoc      # high-fidelity path (or rely on npx)
+    pip install pyhwp          # fallback path for legacy .hwp binaries
+
+Module-level booleans :data:`KORDOC_AVAILABLE` (is the kordoc CLI resolvable)
+and :data:`PYHWP_AVAILABLE` (is ``hwp5`` importable) let callers branch.
 """
 
 from __future__ import annotations
 
 import logging
+import os
+import shlex
+import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -47,17 +64,20 @@ from typing import List, Optional, Union
 __all__ = [
     "HWP_EXTENSIONS",
     "PYHWP_AVAILABLE",
+    "KORDOC_AVAILABLE",
     "HwpConversionError",
     "detect_hwp_format",
     "is_hwp_file",
+    "resolve_kordoc_command",
     "convert_hwp_to_markdown",
     "convert_hwp_to_text",
 ]
 
 logger = logging.getLogger(__name__)
 
-#: File extensions handled by this module.
-HWP_EXTENSIONS: tuple = (".hwp", ".hwpx")
+#: File extensions handled by this module. ``.hwpml`` is only convertible via the
+#: kordoc backend (the lightweight fallback handles ``.hwp`` and ``.hwpx`` only).
+HWP_EXTENSIONS: tuple = (".hwp", ".hwpx", ".hwpml")
 
 # OLE / CFBF (Compound File Binary Format) magic — the signature of HWP v5
 # binary documents (and other Microsoft compound files).
@@ -89,6 +109,130 @@ class HwpConversionError(Exception):
     ``pyhwp`` backend is required but not installed it tells the user exactly
     how to install it (``pip install pyhwp``).
     """
+
+
+# ── kordoc CLI backend (preferred high-fidelity path) ────────────
+#: npm package / executable name for the kordoc CLI.
+_KORDOC_PACKAGE = "kordoc"
+
+
+class _KordocUnavailable(Exception):
+    """Internal signal: the kordoc CLI cannot be invoked on this host.
+
+    Distinct from :class:`HwpConversionError` so the caller can tell *"kordoc is
+    not installed"* (silently fall back) apart from *"kordoc ran but the document
+    failed"* (warn, then fall back).
+    """
+
+
+def _env_flag(name: str) -> bool:
+    """Return ``True`` if environment variable ``name`` is a truthy toggle."""
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def resolve_kordoc_command() -> Optional[List[str]]:
+    """Resolve the argv prefix used to invoke the kordoc CLI, or ``None``.
+
+    Resolution order (first match wins):
+
+    1. ``$KORDOC_CMD`` — explicit override, parsed with :func:`shlex.split`
+       (e.g. ``"npx -y kordoc"`` or ``"/usr/local/bin/kordoc"``).
+    2. a ``kordoc`` executable on ``PATH`` (globally installed).
+    3. ``npx --no-install kordoc`` when ``npx`` is available — runs kordoc only if
+       it is already cached/installed, avoiding a surprise network download.
+    4. ``npx -y kordoc`` only when ``KO_RAG_KORDOC_AUTO_INSTALL`` is opted in
+       (this may download the package on first use).
+
+    Returns ``None`` when kordoc is disabled via ``KO_RAG_DISABLE_KORDOC`` or no
+    runnable command can be found, so callers transparently fall back.
+    """
+    if _env_flag("KO_RAG_DISABLE_KORDOC"):
+        return None
+
+    override = os.environ.get("KORDOC_CMD", "").strip()
+    if override:
+        try:
+            parts = shlex.split(override)
+        except ValueError:
+            parts = override.split()
+        return parts or None
+
+    exe = shutil.which(_KORDOC_PACKAGE)
+    if exe:
+        return [exe]
+
+    npx = shutil.which("npx")
+    if npx:
+        if _env_flag("KO_RAG_KORDOC_AUTO_INSTALL"):
+            return [npx, "-y", _KORDOC_PACKAGE]
+        return [npx, "--no-install", _KORDOC_PACKAGE]
+
+    return None
+
+
+#: Snapshot of kordoc availability at import time (the runtime check is always
+#: re-evaluated via :func:`resolve_kordoc_command`, which honors live env changes).
+KORDOC_AVAILABLE = resolve_kordoc_command() is not None
+
+# Stderr fragments that mean "kordoc isn't actually installed" rather than
+# "kordoc failed on this document" — used to choose silent fallback vs. a warning.
+_KORDOC_MISSING_MARKERS = (
+    "missing package",
+    "could not determine executable",
+    "command not found",
+    "is not recognized",
+    "no such file",
+)
+
+
+def _kordoc_timeout() -> int:
+    """Timeout (seconds) for a single kordoc invocation; default 300."""
+    raw = os.environ.get("KO_RAG_KORDOC_TIMEOUT", "").strip()
+    try:
+        value = int(raw)
+        return value if value > 0 else 300
+    except ValueError:
+        return 300
+
+
+def _convert_with_kordoc(path: Path) -> str:
+    """Convert any kordoc-supported document to a Markdown string via the CLI.
+
+    kordoc prints Markdown to stdout (progress logs go to stderr), so we capture
+    stdout directly. Raises :class:`_KordocUnavailable` when kordoc cannot run at
+    all (so the caller falls back silently) and :class:`HwpConversionError` when
+    kordoc runs but the document fails to convert.
+    """
+    cmd = resolve_kordoc_command()
+    if cmd is None:
+        raise _KordocUnavailable("kordoc CLI is not resolvable")
+
+    argv = [*cmd, str(path)]
+    try:
+        proc = subprocess.run(
+            argv,
+            capture_output=True,
+            timeout=_kordoc_timeout(),
+            check=False,
+        )
+    except FileNotFoundError as exc:  # the launcher (kordoc/npx) vanished
+        raise _KordocUnavailable(f"kordoc launcher not executable: {exc}") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise HwpConversionError(
+            f"kordoc timed out after {_kordoc_timeout()}s on {path.name}"
+        ) from exc
+
+    if proc.returncode != 0:
+        stderr = (proc.stderr or b"").decode("utf-8", "replace").strip()
+        if any(marker in stderr.lower() for marker in _KORDOC_MISSING_MARKERS):
+            raise _KordocUnavailable(f"kordoc not installed: {stderr[:200]}")
+        detail = stderr[:300] or f"exit code {proc.returncode}"
+        raise HwpConversionError(f"kordoc failed on {path.name}: {detail}")
+
+    markdown = (proc.stdout or b"").decode("utf-8", "replace")
+    if not markdown.strip():
+        raise HwpConversionError(f"kordoc produced empty output for {path.name}")
+    return markdown.rstrip() + "\n"
 
 
 # ── Format detection ─────────────────────────────────────────────
@@ -550,25 +694,49 @@ def _hwp_binary_to_text(path: Path) -> str:
 
 
 # ── Public entry points ──────────────────────────────────────────
-def convert_hwp_to_text(file_path: Union[str, Path]) -> str:
-    """Convert an HWP/HWPX document to a plain-text string.
+def _markdown_to_text(markdown: str) -> str:
+    """Reduce a Markdown string to readable plain text.
 
-    For ``.hwpx`` this strips markdown table formatting down to readable lines;
-    for ``.hwp`` it uses the ``hwp5txt`` backend. Raises
-    :class:`HwpConversionError` on failure (including missing pyhwp for ``.hwp``).
+    Drops GitHub table separator rows (``| --- | --- |``) so tables degrade to
+    lines of cell text rather than ASCII art. Other Markdown syntax is left as-is
+    because it stays human-readable.
+    """
+    lines = []
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|") and set(stripped) <= set("| -:"):
+            continue  # skip table separator rows
+        lines.append(line)
+    return "\n".join(lines).strip() + "\n"
+
+
+def convert_hwp_to_text(file_path: Union[str, Path]) -> str:
+    """Convert an HWP/HWPX/HWPML document to a plain-text string.
+
+    Prefers the kordoc backend (whose Markdown is reduced to text); otherwise
+    falls back to the stdlib ``.hwpx`` parser or the ``hwp5txt`` backend for
+    ``.hwp``. Raises :class:`HwpConversionError` on failure (including missing
+    pyhwp for ``.hwp`` when kordoc is unavailable).
     """
     path = Path(file_path).resolve()
+    if not path.exists():
+        raise HwpConversionError(f"Input file does not exist: {path}")
+
+    # Preferred path: kordoc → Markdown → text.
+    try:
+        return _markdown_to_text(_convert_with_kordoc(path))
+    except _KordocUnavailable as exc:
+        logger.debug("kordoc unavailable (%s); using lightweight backend", exc)
+    except HwpConversionError as exc:
+        logger.warning(
+            "kordoc conversion failed (%s); falling back to lightweight backend",
+            exc,
+        )
+
     fmt = detect_hwp_format(path)
     if fmt == "hwpx":
         # Reuse the structured parse, then drop markdown table syntax.
-        markdown = _convert_hwpx(path)
-        lines = []
-        for line in markdown.splitlines():
-            stripped = line.strip()
-            if stripped.startswith("|") and set(stripped) <= set("| -"):
-                continue  # skip table separator rows
-            lines.append(line)
-        return "\n".join(lines).strip() + "\n"
+        return _markdown_to_text(_convert_hwpx(path))
     return _hwp_binary_to_text(path)
 
 
@@ -595,17 +763,40 @@ def convert_hwp_to_markdown(
     if not path.exists():
         raise HwpConversionError(f"Input file does not exist: {path}")
 
+    markdown: Optional[str] = None
+
+    # Preferred high-fidelity path: the kordoc CLI. It handles every supported
+    # format (.hwp v5, legacy HWP3, .hwpx, .hwpml) with the best table fidelity.
+    # On "kordoc not installed" we fall back silently; on a real conversion error
+    # we warn and still try the lightweight backend.
     try:
-        fmt = detect_hwp_format(path)
-    except ValueError as exc:
-        raise HwpConversionError(str(exc)) from exc
+        markdown = _convert_with_kordoc(path)
+        logger.info("Converting %s to markdown via kordoc backend", path.name)
+    except _KordocUnavailable as exc:
+        logger.debug("kordoc unavailable (%s); using lightweight backend", exc)
+    except HwpConversionError as exc:
+        logger.warning(
+            "kordoc conversion failed (%s); falling back to lightweight backend",
+            exc,
+        )
 
-    logger.info("Converting %s (detected format: %s) to markdown", path.name, fmt)
+    # Lightweight fallback: stdlib for .hwpx, pyhwp for .hwp. (.hwpml is only
+    # supported by kordoc, so it surfaces a clear error here.)
+    if markdown is None:
+        try:
+            fmt = detect_hwp_format(path)
+        except ValueError as exc:
+            raise HwpConversionError(str(exc)) from exc
 
-    if fmt == "hwpx":
-        markdown = _convert_hwpx(path)
-    else:  # "hwp"
-        markdown = _convert_hwp_binary(path)
+        logger.info(
+            "Converting %s (detected format: %s) via lightweight backend",
+            path.name,
+            fmt,
+        )
+        if fmt == "hwpx":
+            markdown = _convert_hwpx(path)
+        else:  # "hwp"
+            markdown = _convert_hwp_binary(path)
 
     # Determine and create the output directory.
     if output_dir is not None:

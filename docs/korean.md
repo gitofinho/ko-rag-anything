@@ -184,37 +184,69 @@ await rag.process_document_complete(
 
 ---
 
-## 6. 한글(HWP/HWPX) 문서 처리
+## 6. 한글(HWP/HWPX/HWPML) 문서 처리
 
 ### 왜 필요한가
 
-공공기관·관공서·학술 자료 상당수가 한글(HWP/HWPX) 형식으로 배포된다. 그런데 기본 파이프라인의 핵심 파서인 MinerU는 PDF·이미지·Office 문서를 다룰 뿐 HWP/HWPX는 직접 지원하지 않는다. 그래서 한글 문서를 그대로 넣으면 파싱 단계에서 막힌다. ko-rag-anything은 이 공백을 메우기 위한 **경량 폴백(lightweight fallback)** 변환기를 내장한다.
+공공기관·관공서·학술 자료 상당수가 한글(HWP/HWPX/HWPML) 형식으로 배포된다. 그런데 기본 파이프라인의 핵심 파서인 MinerU는 PDF·이미지·Office 문서를 다룰 뿐 한글 형식은 직접 지원하지 않는다. 그래서 한글 문서를 그대로 넣으면 파싱 단계에서 막힌다. ko-rag-anything은 이 공백을 **2단계(two-tier) 변환 전략**으로 메운다.
 
-### 동작 방식(현재 구현 = 경량 폴백)
+### 동작 방식(2단계 변환 전략)
 
-확장자가 `.hwp`(HWP v5 바이너리)이거나 `.hwpx`(OWPML, 개방형 XML zip)이면 자동으로 감지해 **Markdown으로 먼저 변환**한 뒤, 변환된 `.md`를 기존 마크다운 인덱싱 경로로 그대로 흘려보낸다. 즉 별도 분기를 의식할 필요 없이 `.md`/`.txt`와 동일한 일반 경로를 타게 된다.
+지원 확장자(`.hwp`, `.hwpx`, `.hwpml`)는 자동으로 감지해 **Markdown으로 먼저 변환**한 뒤, 변환된 `.md`를 기존 마크다운 인덱싱 경로로 그대로 흘려보낸다. 즉 별도 분기를 의식할 필요 없이 `.md`/`.txt`와 동일한 일반 경로를 타게 된다(라우팅은 `processor.process_document_complete`에서 처리되며, 라우팅에 쓰이는 확장자 집합은 `HWP_EXTENSIONS = (".hwp", ".hwpx", ".hwpml")`이다).
 
-- **`.hwpx`** — 표준 라이브러리만으로 처리된다(zip + XML 파싱). 추가 설치가 필요 없다.
-- **`.hwp`** — HWP v5 바이너리를 읽기 위해 `pyhwp`가 필요하다. 선택 의존성이므로 한글 `.hwp` 문서를 처리할 때만 설치하면 된다.
+변환은 다음 순서로 시도된다.
+
+1. **고충실도 경로 — `kordoc` CLI (1순위).** Node.js로 작성된 `kordoc`(npm 패키지 `kordoc`, MIT) CLI가 해석 가능하면 모든 지원 형식(`.hwp` v5, 레거시 HWP3, `.hwpx`, `.hwpml`)에 대해 가장 먼저 시도된다. 중첩표·셀 병합(cell span)을 잘 보존한다. kordoc은 변환 결과 Markdown을 **stdout으로 출력**하며, 파이프라인이 이를 직접 캡처한다(임시 출력 파일을 쓰지 않음).
+2. **경량 폴백 — 순수 파이썬 (2순위).** kordoc이 설치되어 있지 않거나 특정 파일에서 실패하면 자체 내장 변환기로 폴백한다.
+   - **`.hwpx`** — 표준 라이브러리만으로 처리된다(`zipfile` + `xml.etree.ElementTree`). 추가 설치가 필요 없다.
+   - **`.hwp`** — HWP v5 바이너리를 읽기 위해 선택 의존성 `pyhwp`가 필요하다. 한글 `.hwp` 문서를 처리할 때만 설치하면 된다.
+   - **`.hwpml`** — 경량 폴백은 지원하지 않는다. **`.hwpml`은 오직 kordoc을 통해서만** 변환되므로, kordoc 없이 `.hwpml`을 넣으면 `HwpConversionError`가 발생한다.
+
+### 설치
 
 ```bash
-# .hwp(바이너리) 변환에만 필요한 선택 의존성
+# 고충실도 경로: kordoc CLI (전역 설치, 또는 npx 사용)
+npm install -g kordoc
+
+# 경량 폴백 중 레거시 .hwp 바이너리 변환에만 필요한 선택 의존성
 pip install pyhwp
 ```
 
+전역 설치 대신 `npx`에 의존해도 된다(아래 명령 해석 순서 참고).
+
+### kordoc 명령 해석 순서
+
+`resolve_kordoc_command()`는 다음 순서로 kordoc 호출 커맨드를 결정한다(먼저 일치하는 것이 채택됨).
+
+1. **`$KORDOC_CMD` 환경 변수** — 호출 커맨드를 직접 지정한다(예: `"npx -y kordoc"` 또는 절대경로 `"/usr/local/bin/kordoc"`).
+2. **PATH 상의 `kordoc` 실행파일** — 전역 설치된 경우.
+3. **`npx --no-install kordoc`** — `npx`가 있을 때. 이미 캐시/설치된 경우에만 실행되며, 예기치 않은 네트워크 다운로드를 방지한다.
+4. **`npx -y kordoc`** — `KO_RAG_KORDOC_AUTO_INSTALL`이 켜져 있을 때만. 최초 사용 시 패키지를 내려받을 수 있다.
+
+### 환경 변수
+
+| 환경 변수 | 역할 |
+|-----------|------|
+| `KORDOC_CMD` | kordoc 호출 커맨드를 직접 지정(위 1순위) |
+| `KO_RAG_DISABLE_KORDOC` | kordoc을 건너뛰고 경량 경로만 강제 사용 |
+| `KO_RAG_KORDOC_AUTO_INSTALL` | `npx -y` 자동 설치 허용(위 4순위) |
+| `KO_RAG_KORDOC_TIMEOUT` | kordoc 호출 타임아웃(초, 기본 `300`) |
+
+각 토글은 `1`/`true`/`yes`/`on`을 참으로 인식한다.
+
 ### 사용법
 
-별도 설정 없이 `.hwp`/`.hwpx` 파일 경로를 그대로 `process_document_complete(...)`에 넘기면 위 라우팅이 자동으로 적용된다.
+별도 설정 없이 `.hwp`/`.hwpx`/`.hwpml` 파일 경로를 그대로 `process_document_complete(...)`에 넘기면 위 2단계 변환과 라우팅이 자동으로 적용된다.
 
 ```python
-# .hwp / .hwpx 도 PDF·이미지와 똑같이 넘기면 된다 (자동 라우팅)
+# .hwp / .hwpx / .hwpml 도 PDF·이미지와 똑같이 넘기면 된다 (자동 라우팅)
 await rag.process_document_complete(
-    file_path="공고문.hwp",     # 또는 "보고서.hwpx"
+    file_path="공고문.hwp",     # 또는 "보고서.hwpx", "사양서.hwpml"
     output_dir="./output",
 )
 ```
 
-배치 처리에서도 인식되도록 `RAGAnythingConfig`의 `SUPPORTED_FILE_EXTENSIONS` 기본값에 `.hwp,.hwpx`가 이미 포함되어 있다(폴더 일괄 처리 시 한글 문서가 자동으로 대상에 잡힌다).
+배치 처리에서도 인식되도록 `RAGAnythingConfig`의 `SUPPORTED_FILE_EXTENSIONS` 기본값에 한글 확장자가 이미 포함되어 있다(폴더 일괄 처리 시 한글 문서가 자동으로 대상에 잡힌다).
 
 인덱싱까지 가지 않고 **변환만** 직접 하고 싶다면 변환 함수를 호출한다. 생성된 `.md` 파일 경로를 문자열로 반환한다.
 
@@ -226,11 +258,13 @@ md_path = convert_hwp_to_markdown("문서.hwp")
 print(md_path)  # -> 생성된 .md 파일 경로
 ```
 
-`output_dir`을 생략하면 적당한 위치에 변환 결과를 두고 그 경로를 돌려준다. 필요한 백엔드가 설치되어 있지 않거나 변환에 실패하면 `HwpConversionError`가 발생한다.
+`output_dir`을 생략하면 적당한 위치에 변환 결과를 두고 그 경로를 돌려준다. 필요한 백엔드가 모두 사용 불가하거나 변환에 실패하면 `HwpConversionError`가 발생한다.
 
 ```python
 from raganything.hwp import (
-    HWP_EXTENSIONS,        # {".hwp", ".hwpx"} — 라우팅에 쓰이는 확장자 집합
+    HWP_EXTENSIONS,        # (".hwp", ".hwpx", ".hwpml") — 라우팅에 쓰이는 확장자 집합
+    KORDOC_AVAILABLE,      # kordoc CLI 해석 가능 여부(임포트 시점 스냅샷)
+    PYHWP_AVAILABLE,       # pyhwp(hwp5) 임포트 가능 여부
     HwpConversionError,
     convert_hwp_to_markdown,
 )
@@ -238,20 +272,22 @@ from raganything.hwp import (
 try:
     md_path = convert_hwp_to_markdown("문서.hwp", output_dir="./output")
 except HwpConversionError as e:
-    print(f"변환 실패: {e}")  # 예: pyhwp 미설치, 손상된 파일 등
+    print(f"변환 실패: {e}")  # 예: kordoc/pyhwp 모두 미설치, 손상된 파일 등
 ```
 
 ### 한계와 권장
 
-현재 경량 경로는 **텍스트와 기본 표 위주**다. 복잡한 표·이미지·수식이 많은 문서는 충실도(fidelity)가 낮아질 수 있다. 다음 사항을 권장한다.
-
-- **표·도표가 많은 문서**: 향후 고품질 경로(**LibreOffice + H2Orestart → PDF → MinerU**)가 권장되나, 이는 **아직 미구현인 향후 계획**이다. 현 시점에서는 경량 폴백만 제공된다.
+- **표 충실도**: 중첩표·셀 병합이 많은 문서는 kordoc 경로가 경량 폴백보다 충실도가 높다. 표가 복잡한 문서는 kordoc 설치를 권장한다.
+- **경량 폴백의 범위**: kordoc 없이 동작하는 경량 경로는 **텍스트와 기본 표 위주**다. 복잡한 표·이미지·수식이 많은 문서는 충실도가 낮아질 수 있고, `.hwpml`은 폴백이 지원하지 않는다.
 - **다국어·한자 혼용 문서**: 검색 품질은 임베딩 모델 선택에 크게 좌우된다. 상단 [7절 한국어 임베딩 모델](#7-한국어-임베딩-모델) 및 혼합 언어 관련 팁(아래 FAQ)을 참고해 다국어 임베딩(`BAAI/bge-m3` 등)을 선택한다.
 
 ### FAQ
 
-- **`.hwp` 변환이 안 될 때** — `pyhwp`가 설치되어 있는지 확인한다(`pip install pyhwp`). `.hwp` 바이너리 경로는 이 백엔드가 없으면 `HwpConversionError`로 실패한다.
-- **`.hwpx`가 깨질 때** — 파일이 표준 OWPML(zip + XML) 형식인지 확인한다. 손상되었거나 비표준으로 저장된 `.hwpx`는 표준 라이브러리 파서가 읽지 못할 수 있다.
+- **kordoc을 쓰고 싶지 않을 때** — `KO_RAG_DISABLE_KORDOC=1`을 설정하면 kordoc을 건너뛰고 경량 경로만 사용한다.
+- **kordoc이 잡히지 않을 때** — 전역 설치(`npm install -g kordoc`)했는지, 또는 `KORDOC_CMD`로 커맨드를 직접 지정했는지 확인한다. `npx` 자동 설치는 보안상 기본 비활성화이며 `KO_RAG_KORDOC_AUTO_INSTALL=1`일 때만 허용된다.
+- **`.hwpml` 변환이 안 될 때** — `.hwpml`은 kordoc 전용이다. kordoc이 해석 가능한지(`KORDOC_AVAILABLE`) 확인한다. 경량 폴백으로는 변환되지 않는다.
+- **`.hwp` 변환이 안 될 때** — kordoc이 없다면 경량 폴백이 `pyhwp`를 요구한다. 설치되어 있는지 확인한다(`pip install pyhwp`). kordoc·pyhwp가 모두 없으면 `.hwp` 바이너리는 `HwpConversionError`로 실패한다.
+- **`.hwpx`가 깨질 때** — 파일이 표준 OWPML(zip + XML) 형식인지 확인한다. 손상되었거나 비표준으로 저장된 `.hwpx`는 표준 라이브러리 파서가 읽지 못할 수 있다(이때도 kordoc이 있으면 우선 시도된다).
 
 ---
 

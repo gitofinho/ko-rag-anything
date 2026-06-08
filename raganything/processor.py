@@ -537,7 +537,8 @@ class ProcessorMixin:
                 )
             elif ext in HWP_EXTENSIONS:
                 self.logger.info(
-                    "Detected HWP/HWPX file, converting to Markdown (lightweight path)..."
+                    "Detected HWP/HWPX/HWPML file, converting to Markdown "
+                    "(kordoc backend, lightweight fallback)..."
                 )
                 try:
                     md_path = await asyncio.to_thread(

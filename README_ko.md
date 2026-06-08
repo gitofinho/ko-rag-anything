@@ -82,6 +82,7 @@
 - **한국어 프롬프트 템플릿** — `raganything.prompt_manager`의 `set_prompt_language("ko")`를 호출하면 이미지 분석, 표 해석, 엔티티 추출 등 파이프라인 전반의 프롬프트를 한국어로 전환합니다. (사용 가능한 언어가 없을 경우 `register_prompt_language()`로 직접 등록할 수 있습니다.)
 - **한국어 텍스트 유틸리티** — `raganything.korean_utils`는 정규화(normalization), 문장 분리, 한국어 인식 토크나이저를 제공하며, 선택적으로 `kiwipiepy` 기반 형태소 분석을 활용할 수 있습니다.
 - **한국어 임베딩·OCR 가이드** — `BAAI/bge-m3`, `nlpai-lab/KURE-v1`처럼 한국어를 잘 지원하는 임베딩 모델과, `lang="korean"` 옵션을 적용한 MinerU OCR 사용을 권장합니다.
+- **한글 문서(HWP/HWPX/HWPML) 처리** — `kordoc` CLI를 1순위 백엔드로 사용해 한글 문서를 고충실도 Markdown으로 변환하며(중첩표·셀 병합 보존), kordoc이 없으면 순수 파이썬 경량 변환기로 자동 폴백합니다.
 
 자세한 사용 방법은 [`docs/korean.md`](docs/korean.md) 가이드와 [`examples/korean_example.py`](examples/korean_example.py) 예제를 참고하세요.
 
@@ -123,7 +124,7 @@
 - **⚡ 적응형 처리 모드** - 유연한 MinerU 기반 파싱 또는 직접 멀티모달 콘텐츠 주입 워크플로
 - **📋 콘텐츠 리스트 직접 삽입** - 외부 소스에서 미리 파싱한 콘텐츠 리스트를 직접 삽입하여 문서 파싱 단계를 생략
 - **🎯 하이브리드 지능형 검색** - 문맥 이해를 바탕으로 텍스트와 멀티모달 콘텐츠를 아우르는 고급 검색 기능
-- **🇰🇷 한국어 강화** - 한국어 프롬프트 템플릿(`set_prompt_language("ko")`), 한국어 텍스트 유틸리티(`raganything.korean_utils`), 한국어 임베딩·OCR 가이드 제공
+- **🇰🇷 한국어 강화** - 한국어 프롬프트 템플릿(`set_prompt_language("ko")`), 한국어 텍스트 유틸리티(`raganything.korean_utils`), 한국어 임베딩·OCR 가이드, kordoc 기반 한글(HWP/HWPX/HWPML) 고충실도 변환(순수 파이썬 폴백 포함) 제공
 
 </div>
 
